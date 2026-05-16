@@ -1,5 +1,9 @@
 # Deployment
 
+> **Status: not yet deployed.** This is a **planning document** describing how CyberScore *would be* deployed — not a record of an actual production rollout. Nothing in this guide has been executed against real infrastructure. The recommendations are based on the architectural shape of the app (stateless API, separate worker process, RLS-aware Postgres) and on what we know each provider supports — but every command, env var, and price point below needs to be **validated by the person doing the deployment**.
+>
+> When the next batch (or anyone) actually deploys, please update this doc with what you learned: what broke, what providers you actually picked, what the real bill turned out to be.
+
 How to take CyberScore from local dev to production. There are three things to deploy independently:
 
 1. **API** (Next.js) — stateless, horizontally scalable
@@ -13,7 +17,7 @@ Plus three managed services:
 
 ## Recommended hosting
 
-The stack is intentionally portable. Below is one validated combination; substitute equivalents at will.
+The stack is intentionally portable. Below is **one suggested combination** — not a tested one. Substitute equivalents at will.
 
 | Component | Recommended | Alternatives |
 |---|---|---|
@@ -241,18 +245,20 @@ Production checklist:
 - **Mobile binary** — submit the previous version via EAS, or use phased rollout on the store side.
 - **OTA update** — `eas update:rollback --branch production` reverts to the previous bundle.
 
-## Cost ceiling (rough, for ~1000 active orgs)
+## Cost projection (rough, for ~1000 active orgs)
 
-| Service | Tier | Monthly |
+> **These are list prices from each provider's marketing page, not figures we've paid.** Real costs vary with traffic, storage, AI usage, and whichever tier you actually pick. Treat this as an order-of-magnitude estimate to help you decide whether the stack is affordable — not a budget.
+
+| Service | Tier | List price |
 |---|---|---|
 | Vercel (API) | Pro | $20 + usage |
 | Render (workers) | Starter | $7 |
 | Supabase Postgres | Pro | $25 |
-| Upstash Redis | Pay-as-you-go | ~$10 |
+| Upstash Redis | Pay-as-you-go | ~$10 (depends on requests/month) |
 | Cloudflare R2 | Pay-as-you-go | ~$5 (1TB free egress) |
-| Anthropic API | Pay-as-you-go | depends — see daily budget in `.env` |
+| Anthropic API | Pay-as-you-go | swing variable — see daily budget in `.env` |
 | Sentry | Team | $26 |
 | Expo EAS | Production | $99 |
 | **Total** | | **~$200/mo + AI usage** |
 
-AI cost is the swing variable. With prompt caching the per-chat-turn cost is fractions of a cent after the first turn; the daily budget guard prevents runaway spend.
+AI cost is the wildcard. With prompt caching the per-chat-turn cost drops to fractions of a cent after the first turn within the 5-minute cache window; the daily budget guard (`ANTHROPIC_DAILY_BUDGET_USD`) prevents runaway spend by falling back from Sonnet to Haiku. Plan to **monitor `ai_usage` rows during the first month** of real traffic to recalibrate.

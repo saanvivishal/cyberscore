@@ -138,11 +138,13 @@
 
 ## 8. Deployment
 
+> **Honest framing:** the project has **not actually been deployed** yet. The deployment doc below is a *planning guide* for whoever deploys next — not a runbook for an already-running production system. The architecture supports deployment cleanly (stateless API, separate worker, standalone Next build, managed-DB friendly), but no commands in the guide have been executed against real infrastructure.
+
 | Item | Status | Where |
 |---|---|---|
-| Deployment steps documented | ✅ | [docs/deployment.md](docs/deployment.md) — per-component runbook |
-| Hosting platform details | ✅ | Recommended: Vercel + Render + Supabase + Upstash + R2 + EAS. See [docs/deployment.md — Recommended hosting](docs/deployment.md#recommended-hosting) |
-| Environment configs for production | ✅ | [docs/deployment.md — Environment variables](docs/deployment.md#environment-variables) |
+| Deployment steps documented | 🟡 | [docs/deployment.md](docs/deployment.md) — planning guide, not yet executed |
+| Hosting platform details | 🟡 | Suggested: Vercel + Render + Supabase + Upstash + R2 + EAS — see [docs/deployment.md — Recommended hosting](docs/deployment.md#recommended-hosting). None of these accounts are provisioned yet |
+| Environment configs for production | 🟡 | Vars documented in [docs/deployment.md — Environment variables](docs/deployment.md#environment-variables); production secrets not generated |
 | CI/CD pipeline | ⚪️ | Not yet wired. Template provided in [docs/deployment.md — CI/CD](docs/deployment.md#cicd) for next batch to drop in |
 
 ---
