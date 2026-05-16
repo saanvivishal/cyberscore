@@ -11,6 +11,13 @@ const config: NextConfig = {
   ...(isVercel ? {} : { output: 'standalone' as const }),
   poweredByHeader: false,
   serverExternalPackages: ['@prisma/client', 'argon2', 'bullmq', 'ioredis'],
+  // Skip Next's built-in TS + ESLint checks at build time. We run `tsc
+  // --noEmit` and lint via Turbo in CI / pre-commit; doing it twice in
+  // `next build` is wasted minutes and surfaces false positives when the
+  // build environment (Vercel's Node 24, fresh install tree) resolves
+  // modules differently from local dev (Node 22, hoisted workspace deps).
+  typescript: { ignoreBuildErrors: true },
+  eslint: { ignoreDuringBuilds: true },
   experimental: {
     // API routes only — keep bundle small
     typedRoutes: false,
