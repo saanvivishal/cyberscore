@@ -1,9 +1,14 @@
 import type { NextConfig } from 'next';
 
+// On Vercel we let their build adapter handle output packaging. Outside
+// Vercel (self-hosted Docker, etc.) we want a standalone build so the image
+// can be small.
+const isVercel = !!process.env.VERCEL;
+
 const config: NextConfig = {
   reactStrictMode: true,
   // API-only app. No frontend pages.
-  output: 'standalone',
+  ...(isVercel ? {} : { output: 'standalone' as const }),
   poweredByHeader: false,
   serverExternalPackages: ['@prisma/client', 'argon2', 'bullmq', 'ioredis'],
   experimental: {
