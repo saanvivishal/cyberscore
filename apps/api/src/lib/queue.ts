@@ -1,0 +1,157 @@
+import { Queue, QueueEvents, type JobsOptions } from 'bullmq';
+import { createRedisConnection } from './redis';
+import { logger } from './logger';
+
+// Job queues — one per concern so backpressure on PDFs doesn't stall OTPs.
+// Workers live in src/workers/ and run as separate Node processes.
+//
+// Retry policy: exponential backoff, capped attempts, fail into dead
+// letter via Bull's built-in failedReason tracking.
+
+export const QueueNames = {
+  EMAIL: 'email',
+  PDF: 'pdf',
+  AI: 'ai',
+  PUSH: 'push',
+  SNAPSHOT: 'snapshot',
+  ABANDONMENT: 'abandonment',
+} as const;
+export type QueueName = (typeof QueueNames)[keyof typeof QueueNames];
+
+const DEFAULT_JOB_OPTS: JobsOptions = {
+  attempts: 5,
+  backoff: { type: 'exponential', delay: 5_000 },
+  removeOnComplete: { age: 3600, count: 1000 }, // keep 1h / 1000 for observability
+  removeOnFail: { age: 7 * 86_400 }, // keep failed jobs 7 days for DLQ inspection
+};
+
+// ------------------------------------------------------------
+// Job payload types
+// ------------------------------------------------------------
+export interface EmailOtpJob {
+  type: 'OTP';
+  email: string;
+  orgName: string;
+  code: string;
+}
+export interface EmailPdfJob {
+  type: 'SCORECARD_PDF';
+  email: string;
+  orgName: string;
+  pdfUrl: string;
+}
+export interface EmailInviteJob {
+  type: 'INVITE';
+  email: string;
+  orgName: string;
+  invitedByName: string | null;
+  inviteUrl: string;
+  expiresAt: string; // ISO
+}
+export type EmailJob = EmailOtpJob | EmailPdfJob | EmailInviteJob;
+
+export interface PdfJob {
+  snapshotId: string;
+  orgId: string;
+}
+
+export interface AiCompareJob {
+  orgId: string;
+  userId: string;
+  traceId: string;
+}
+
+export interface PushJob {
+  orgId: string;
+  title: string;
+  body: string;
+  data?: Record<string, unknown>;
+}
+
+export interface SnapshotJob {
+  orgId: string;
+  reason: 'KPI_SUBMITTED' | 'SCHEDULED' | 'MANUAL';
+}
+
+export interface AbandonmentJob {
+  orgId: string;
+  stage: '24H' | '72H' | '7D';
+}
+
+// ------------------------------------------------------------
+// Queue singletons — used by API route handlers to enqueue work.
+// Workers in src/workers/ consume from these.
+// ------------------------------------------------------------
+const globalForQueues = globalThis as unknown as {
+  _queues?: Record<QueueName, Queue>;
+};
+
+function buildQueue<T>(name: QueueName): Queue<T> {
+  const connection = createRedisConnection();
+  const q = new Queue<T>(name, { connection, defaultJobOptions: DEFAULT_JOB_OPTS });
+  const events = new QueueEvents(name, { connection: createRedisConnection() });
+  events.on('failed', ({ jobId, failedReason }) => {
+    logger.warn({ queue: name, jobId, failedReason }, 'BullMQ job failed');
+  });
+  return q;
+}
+
+function getQueues(): Record<QueueName, Queue> {
+  if (!globalForQueues._queues) {
+    globalForQueues._queues = {
+      [QueueNames.EMAIL]: buildQueue<EmailJob>(QueueNames.EMAIL),
+      [QueueNames.PDF]: buildQueue<PdfJob>(QueueNames.PDF),
+      [QueueNames.AI]: buildQueue<AiCompareJob>(QueueNames.AI),
+      [QueueNames.PUSH]: buildQueue<PushJob>(QueueNames.PUSH),
+      [QueueNames.SNAPSHOT]: buildQueue<SnapshotJob>(QueueNames.SNAPSHOT),
+      [QueueNames.ABANDONMENT]: buildQueue<AbandonmentJob>(QueueNames.ABANDONMENT),
+    };
+  }
+  return globalForQueues._queues;
+}
+
+export const queues = {
+  email: () => getQueues()[QueueNames.EMAIL] as Queue<EmailJob>,
+  pdf: () => getQueues()[QueueNames.PDF] as Queue<PdfJob>,
+  ai: () => getQueues()[QueueNames.AI] as Queue<AiCompareJob>,
+  push: () => getQueues()[QueueNames.PUSH] as Queue<PushJob>,
+  snapshot: () => getQueues()[QueueNames.SNAPSHOT] as Queue<SnapshotJob>,
+  abandonment: () => getQueues()[QueueNames.ABANDONMENT] as Queue<AbandonmentJob>,
+};
+
+// ------------------------------------------------------------
+// Convenience enqueuers — type-safe wrappers used by route handlers
+// ------------------------------------------------------------
+export async function enqueueOtpEmail(payload: Omit<EmailOtpJob, 'type'>): Promise<void> {
+  await queues.email().add('otp', { type: 'OTP', ...payload });
+}
+
+export async function enqueueInviteEmail(payload: Omit<EmailInviteJob, 'type'>): Promise<void> {
+  await queues.email().add('invite', { type: 'INVITE', ...payload });
+}
+
+export async function enqueueSnapshot(payload: SnapshotJob): Promise<void> {
+  // dedupe: one pending snapshot per org at a time. BullMQ rejects ':' in
+  // custom jobIds, so we use '_' as the separator.
+  await queues.snapshot().add('snapshot', payload, {
+    jobId: `snapshot_${payload.orgId}`,
+    removeOnComplete: true,
+  });
+}
+
+export async function enqueuePush(payload: PushJob): Promise<void> {
+  await queues.push().add('push', payload);
+}
+
+export async function enqueueAiCompare(payload: AiCompareJob): Promise<void> {
+  await queues.ai().add('compare', payload);
+}
+
+// Deterministic jobId per (org, stage) — prevents double-nagging when the
+// daily sweep runs more than once. BullMQ rejects ':' in custom jobIds.
+export async function enqueueAbandonment(payload: AbandonmentJob): Promise<void> {
+  await queues.abandonment().add('abandonment', payload, {
+    jobId: `abandonment_${payload.orgId}_${payload.stage}`,
+    removeOnComplete: true,
+  });
+}

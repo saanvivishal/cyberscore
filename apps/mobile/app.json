@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "CyberScore",
+    "slug": "cyberscore",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "cyberscore",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": false,
+    "backgroundColor": "#05060d",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.cyberscore.app"
+    },
+    "android": {
+      "package": "com.cyberscore.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#05060d"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-local-authentication",
+      "expo-notifications",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "apiBaseUrl": "http://localhost:3000"
+    }
+  }
+}

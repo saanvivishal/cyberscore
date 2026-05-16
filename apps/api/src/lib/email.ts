@@ -1,0 +1,134 @@
+import nodemailer, { type Transporter } from 'nodemailer';
+import { env, isProd } from './env';
+import { logger } from './logger';
+
+let cached: Transporter | null = null;
+
+function transport(): Transporter {
+  if (cached) return cached;
+
+  // In dev without SMTP config, use nodemailer's JSON transport
+  // so OTP mail goes to the log instead of actually sending.
+  if (!env.SMTP_HOST) {
+    if (isProd) throw new Error('SMTP_HOST must be set in production');
+    cached = nodemailer.createTransport({ jsonTransport: true });
+    return cached;
+  }
+
+  cached = nodemailer.createTransport({
+    host: env.SMTP_HOST,
+    port: env.SMTP_PORT,
+    secure: env.SMTP_PORT === 465,
+    auth:
+      env.SMTP_USER && env.SMTP_PASS
+        ? { user: env.SMTP_USER, pass: env.SMTP_PASS }
+        : undefined,
+  });
+
+  return cached;
+}
+
+export interface SendArgs {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+}
+
+export async function sendEmail(args: SendArgs): Promise<void> {
+  const info = await transport().sendMail({
+    from: env.SMTP_FROM,
+    to: args.to,
+    subject: args.subject,
+    html: args.html,
+    text: args.text,
+  });
+
+  if (!isProd && (info as { message?: string }).message) {
+    logger.info(
+      { to: args.to, subject: args.subject },
+      'Email dispatched (dev JSON transport — check the message field)',
+    );
+  }
+}
+
+// ------------------------------------------------------------
+// Templates
+// ------------------------------------------------------------
+export function otpEmailTemplate(args: { orgName: string; code: string }): {
+  subject: string;
+  html: string;
+  text: string;
+} {
+  const subject = 'Your CyberScore verification code';
+  const text = `Hi ${args.orgName},
+
+Your verification code is: ${args.code}
+
+This code expires in 10 minutes. If you didn't request it, ignore this email.
+
+— CyberScore`;
+
+  const html = `<!doctype html>
+<html><body style="font-family: system-ui, sans-serif; padding: 24px;">
+  <h2>Verify your email</h2>
+  <p>Hi <strong>${escapeHtml(args.orgName)}</strong>,</p>
+  <p>Your CyberScore verification code is:</p>
+  <p style="font-size: 32px; font-weight: 700; letter-spacing: 4px;">${args.code}</p>
+  <p style="color: #666;">This code expires in 10 minutes. If you didn't request it, ignore this email.</p>
+</body></html>`;
+
+  return { subject, html, text };
+}
+
+// Invite email — sent when an admin adds an employee to their company.
+// inviteUrl is the deep link the employee follows to set their password.
+export function inviteEmailTemplate(args: {
+  orgName: string;
+  invitedByName: string | null;
+  inviteUrl: string;
+  expiresAt: string; // ISO
+}): { subject: string; html: string; text: string } {
+  const subject = `You've been invited to join ${args.orgName} on CyberScore`;
+  const inviter = args.invitedByName ? `${args.invitedByName} (${args.orgName})` : args.orgName;
+  const expiresHuman = new Date(args.expiresAt).toLocaleDateString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
+
+  const text = `${inviter} invited you to join their CyberScore workspace.
+
+Open this link to accept the invite and set your password:
+${args.inviteUrl}
+
+This link expires on ${expiresHuman}. If you weren't expecting this, ignore the email.
+
+— CyberScore`;
+
+  const html = `<!doctype html>
+<html><body style="font-family: system-ui, sans-serif; padding: 24px; max-width: 560px;">
+  <h2>You've been invited to CyberScore</h2>
+  <p><strong>${escapeHtml(inviter)}</strong> invited you to join their workspace.</p>
+  <p>
+    <a href="${escapeHtml(args.inviteUrl)}"
+       style="display:inline-block;padding:12px 20px;background:#3b82f6;color:#fff;
+              border-radius:8px;text-decoration:none;font-weight:700;">
+      Accept invite
+    </a>
+  </p>
+  <p style="color:#666;font-size:13px;">Or paste this link: ${escapeHtml(args.inviteUrl)}</p>
+  <p style="color:#666;font-size:13px;">Expires ${expiresHuman}. Ignore this email if you weren't expecting it.</p>
+</body></html>`;
+
+  return { subject, html, text };
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
