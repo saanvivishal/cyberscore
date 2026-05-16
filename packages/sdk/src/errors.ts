@@ -13,6 +13,13 @@ export class ApiError extends Error {
     this.problem = problem;
   }
 
+  // Convenience getter — UI code frequently wants the human-readable title
+  // for fallback error toasts ("err.title || 'Something went wrong'").
+  // Without this, every callsite has to dig into `err.problem.title`.
+  get title(): string {
+    return this.problem.title;
+  }
+
   isAuthExpired(): boolean {
     return this.status === 401 && this.code === 'AUTH_TOKEN_EXPIRED';
   }

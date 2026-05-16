@@ -19,12 +19,14 @@ import { api } from '@/lib/api';
 import { streamChatMessage } from '@/lib/chatStream';
 import { colors } from '@/theme/colors';
 
-// Suggested prompts surfaced in the empty state — tap to send.
+// Suggested prompts surfaced in the empty state — tap to send. These map
+// to specific intents the advisor handles confidently, so the user's first
+// tap always lands on a useful answer.
 const SUGGESTIONS = [
-  'Where am I weakest right now?',
-  'What should I fix first this week?',
-  'Explain my People score in plain English.',
-  'How do I move my Company score from RED to AMBER?',
+  'Where am I weakest?',
+  'What should I focus on first?',
+  'How do I improve my Process score?',
+  'What threats matter for my industry?',
 ];
 
 export default function Chat() {

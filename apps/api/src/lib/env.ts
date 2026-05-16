@@ -46,6 +46,15 @@ const envSchema = z.object({
   RATE_LIMIT_LOGIN_WINDOW_MS: z.coerce.number().int().default(15 * 60 * 1000),
 
   AI_FREE_DAILY_CALLS: z.coerce.number().int().default(20),
+
+  // When true, the chat endpoint routes to the local rule-based advisor
+  // (apps/api/src/lib/advisor-local.ts) instead of calling Anthropic. Default
+  // is true so dev / demo environments work without an API key + credit
+  // balance. Flip to false in prod when you have real budget.
+  USE_LOCAL_ADVISOR: z
+    .union([z.boolean(), z.enum(['true', 'false'])])
+    .transform((v) => (typeof v === 'string' ? v === 'true' : v))
+    .default(true),
 });
 
 const parsed = envSchema.safeParse(process.env);

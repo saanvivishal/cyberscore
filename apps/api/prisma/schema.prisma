@@ -352,7 +352,8 @@ model ScoringTier {
   scoreValue Int
   tierOrder  Int // 1 = best, higher = worse
 
-  kpi Kpi @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  kpi       Kpi        @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  responses Response[] @relation("ResponseMatchedTier")
 
   @@unique([kpiId, tierOrder])
   @@index([kpiId])
@@ -378,10 +379,11 @@ model Response {
   createdAt   DateTime @default(now())
   submittedAt DateTime @default(now()) @updatedAt
 
-  org         Organisation         @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  kpi         Kpi                  @relation(fields: [kpiId], references: [id], onDelete: Restrict)
-  submittedBy User?                @relation(fields: [submittedById], references: [id], onDelete: SetNull)
-  evidence    EvidenceAttachment[]
+  org          Organisation         @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  kpi          Kpi                  @relation(fields: [kpiId], references: [id], onDelete: Restrict)
+  submittedBy  User?                @relation(fields: [submittedById], references: [id], onDelete: SetNull)
+  matchedTier  ScoringTier?         @relation("ResponseMatchedTier", fields: [matchedTierId], references: [id], onDelete: SetNull)
+  evidence     EvidenceAttachment[]
 
   // Multi-user safe. For ORG-scope KPIs, only the admin's row is scored;
   // employee rows are kept as a consensus signal. For EMPLOYEE-scope KPIs,

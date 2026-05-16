@@ -10,8 +10,10 @@ import { withTenant } from '@/lib/prisma';
 import { problem, parseJson, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';
 import { anthropic, recordUsage, sanitiseUserText } from '@/lib/ai';
+import { generateAdvisorReply, streamAdvisorReply } from '@/lib/advisor-local';
 import { env } from '@/lib/env';
 import { logger } from '@/lib/logger';
+import { rateLimit } from '@/lib/rate-limit';
 import { aggregate, loadScorecardInputs } from '@/lib/scorecard';
 
 // GET /api/v1/ai/chat/threads/:id/messages
@@ -91,6 +93,21 @@ export async function POST(
   if ('response' in auth) return auth.response;
   const { id: threadId } = await params;
 
+  // Per-user rate limit on chat sends. Caps one user from burning through
+  // the org's daily AI budget (or, for the local advisor, just spamming the
+  // DB) at 20 messages per minute. Generous enough for normal use, tight
+  // enough that a stuck UI retry loop doesn't snowball.
+  const rl = await rateLimit({
+    key: `chat:send:${auth.orgId}:${auth.userId}`,
+    max: 20,
+    windowMs: 60 * 1000,
+  });
+  if (!rl.allowed) {
+    return problem(ErrorCodes.AUTH_RATE_LIMITED, {
+      headers: { 'Retry-After': String(rl.retryAfterSec) },
+    });
+  }
+
   const parsed = await parseJson(req, SendChatMessageRequest);
   if (!parsed.ok) return parsed.response;
   const userContent = sanitiseUserText(parsed.data.content);
@@ -101,6 +118,8 @@ export async function POST(
   let bootstrap: {
     history: Array<{ role: ChatRole; content: string }>;
     scorecardJson: string;
+    aggregate: ReturnType<typeof aggregate>;
+    industry: string;
     thread: { id: string; title: string };
   };
   try {
@@ -124,9 +143,14 @@ export async function POST(
       });
       if (!thread) return null;
 
+      const org = await tx.organisation.findUnique({
+        where: { id: auth.orgId },
+        select: { industry: true },
+      });
+
       const { kpis, responses } = await loadScorecardInputs(tx, auth.orgId);
       const agg = aggregate(kpis, responses);
-      return { thread, agg };
+      return { thread, agg, industry: org?.industry ?? 'Other' };
     });
 
     if (!data) return problem(ErrorCodes.NOT_FOUND);
@@ -170,6 +194,8 @@ export async function POST(
         content: m.content,
       })),
       scorecardJson,
+      aggregate: data.agg,
+      industry: data.industry,
       thread: { id: data.thread.id, title: data.thread.title },
     };
   } catch (err) {
@@ -250,31 +276,59 @@ export async function POST(
         createdAt: userMessageRow.createdAt.toISOString(),
       });
 
-      let modelUsed = env.ANTHROPIC_MODEL_PRIMARY;
+      let modelUsed = env.USE_LOCAL_ADVISOR
+        ? 'cyberscore-local-advisor'
+        : env.ANTHROPIC_MODEL_PRIMARY;
       let assistantText = '';
+      let inputTokens = 0;
+      let outputTokens = 0;
+      let cacheReadTokens = 0;
+      let cacheCreationTokens = 0;
       try {
-        const anthropicStream = anthropic().messages.stream({
-          model: modelUsed,
-          max_tokens: 2048,
-          // Snappy first-token latency — chat needs to feel alive. We can
-          // flip this to adaptive thinking later for harder questions.
-          thinking: { type: 'disabled' },
-          system,
-          messages,
-        });
-
-        for await (const event of anthropicStream) {
-          if (
-            event.type === 'content_block_delta' &&
-            event.delta.type === 'text_delta'
-          ) {
-            assistantText += event.delta.text;
-            writeEvent(controller, { type: 'delta', text: event.delta.text });
+        if (env.USE_LOCAL_ADVISOR) {
+          // Rule-based advisor — no external API call. Builds the full reply
+          // up front from the user's scorecard + sector knowledge primer,
+          // then streams it word-by-word so the UX matches the real-AI path.
+          const reply = generateAdvisorReply({
+            scorecard: bootstrap.aggregate,
+            industry: bootstrap.industry,
+            history: bootstrap.history,
+            userMessage: userContent,
+          });
+          for await (const chunk of streamAdvisorReply(reply)) {
+            assistantText += chunk;
+            writeEvent(controller, { type: 'delta', text: chunk });
           }
-        }
+          // No real token usage to record; leave the counters at zero so
+          // ai_usage rows for the local advisor don't pollute spend reports.
+        } else {
+          const anthropicStream = anthropic().messages.stream({
+            model: modelUsed,
+            max_tokens: 2048,
+            // Snappy first-token latency — chat needs to feel alive. We can
+            // flip this to adaptive thinking later for harder questions.
+            thinking: { type: 'disabled' },
+            system,
+            messages,
+          });
 
-        const final = await anthropicStream.finalMessage();
-        modelUsed = final.model;
+          for await (const event of anthropicStream) {
+            if (
+              event.type === 'content_block_delta' &&
+              event.delta.type === 'text_delta'
+            ) {
+              assistantText += event.delta.text;
+              writeEvent(controller, { type: 'delta', text: event.delta.text });
+            }
+          }
+
+          const final = await anthropicStream.finalMessage();
+          modelUsed = final.model;
+          inputTokens = final.usage.input_tokens;
+          outputTokens = final.usage.output_tokens;
+          cacheReadTokens = final.usage.cache_read_input_tokens ?? 0;
+          cacheCreationTokens = final.usage.cache_creation_input_tokens ?? 0;
+        }
 
         // Persist the assistant turn + record token usage. Wrapped in
         // withBypassRls path via withTenant since we're scoped by orgId.
@@ -284,10 +338,10 @@ export async function POST(
               threadId,
               role: ChatRole.ASSISTANT,
               content: assistantText,
-              inputTokens: final.usage.input_tokens,
-              outputTokens: final.usage.output_tokens,
-              cacheReadTokens: final.usage.cache_read_input_tokens ?? 0,
-              cacheCreationTokens: final.usage.cache_creation_input_tokens ?? 0,
+              inputTokens,
+              outputTokens,
+              cacheReadTokens,
+              cacheCreationTokens,
             },
             select: { id: true, createdAt: true },
           });
@@ -310,12 +364,16 @@ export async function POST(
               });
             }
           }
-          await recordUsage(tx, {
-            orgId: auth.orgId,
-            model: modelUsed,
-            inputTokens: final.usage.input_tokens,
-            outputTokens: final.usage.output_tokens,
-          });
+          // Only record usage for paid model calls. Local advisor calls
+          // have zero token cost — recording them would skew the cost dash.
+          if (!env.USE_LOCAL_ADVISOR) {
+            await recordUsage(tx, {
+              orgId: auth.orgId,
+              model: modelUsed,
+              inputTokens,
+              outputTokens,
+            });
+          }
           return row;
         });
 
@@ -324,10 +382,10 @@ export async function POST(
           messageId: assistantRow.id,
           createdAt: assistantRow.createdAt.toISOString(),
           modelUsed,
-          inputTokens: final.usage.input_tokens,
-          outputTokens: final.usage.output_tokens,
-          cacheReadTokens: final.usage.cache_read_input_tokens ?? 0,
-          cacheCreationTokens: final.usage.cache_creation_input_tokens ?? 0,
+          inputTokens,
+          outputTokens,
+          cacheReadTokens,
+          cacheCreationTokens,
         });
       } catch (err) {
         logger.error({ err, threadId, orgId: auth.orgId }, 'chat stream failed');

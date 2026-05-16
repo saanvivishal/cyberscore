@@ -4,14 +4,27 @@ All notable changes to CyberScore will be documented here. The format follows [K
 
 ## [Unreleased]
 
-Items currently in `main` that haven't been tagged into a release yet.
+## [0.2.0] — 2026-05-16
+
+Quality + cost-control release. The chat advisor now runs without an Anthropic budget, and the highest-leverage known issues from v0.1.0 are fixed.
 
 ### Added
-- Roadmap, requirements, architecture, system design, deployment, known-issues docs under `docs/`
-- `HANDOVER_CHECKLIST.md` at the repo root
-- `CONTRIBUTING.md` documenting branching strategy + PR process
-- MIT `LICENSE`
-- `scripts/setup.sh` for one-shot local bootstrap
+- **Local rule-based AI advisor** (`apps/api/src/lib/advisor-local.ts`) — same SSE wire format as the Anthropic path, with sector knowledge primers for all 8 industries (Banking, Healthcare, Technology, Manufacturing, Retail, Education, Government, Other). Gated by `USE_LOCAL_ADVISOR=true` (default).
+- **RLS migration** (`migrations/20260516123100_rls_policies/`) — enables FORCE row-level security on 19 tenant-scoped tables with bypass support for system / login / registration flows
+- **Response → ScoringTier relation** in the schema (migration `20260516123040_add_response_matched_tier_relation`) — unlocks the admin team scorecard's tier-distribution view
+- **Per-user chat rate limit** — 20 messages per minute via Redis sliding window
+- **`title` getter on `ApiError`** — fixes the 4 pre-existing TS errors in mobile UI files
+
+### Changed
+- Chat empty-state suggestions retuned to questions the local advisor handles confidently
+- `known-issues.md`, `deployment.md`, `HANDOVER_CHECKLIST.md` reframed to reflect what's done vs what's still pending
+- The deployment guide is now explicitly labelled as a planning document, not a runbook for an existing deployment
+
+### Fixed
+- `Property 'title' does not exist on type 'ApiError'` in `team.tsx`, `invite.tsx`, `register.tsx`, `reset-password.tsx`
+- `Property 'matchedTier' does not exist on type ResponseSelect` in `admin/scorecard/route.ts`
+- Chat endpoint hit `400 invalid_request_error` when the Anthropic account had zero balance (now bypassed by default via the local advisor)
+- Migration `20260516123040_add_response_matched_tier_relation` includes a data-cleanup step (NULL out orphaned `matchedTierId` rows from prior reseeds) before adding the FK
 
 ## [0.1.0] — 2026-05-16
 
