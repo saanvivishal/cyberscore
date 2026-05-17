@@ -35,7 +35,49 @@ export interface SendArgs {
   text: string;
 }
 
+// Outbound SMTP from Vercel serverless is flaky — Vercel sometimes
+// blocks/throttles raw TCP on 25/465/587, which leaves nodemailer hung
+// for 30+ seconds before timing out (Vercel kills the function before
+// then and the caller sees a 500). If the configured SMTP_PASS looks
+// like a Resend API key (`re_...`) we route through Resend's HTTPS
+// REST API instead — same credentials, same sender, but a plain
+// fetch() which Vercel handles reliably and in ~200ms.
+function isResendApiKey(pass: string | undefined): pass is string {
+  return !!pass && pass.startsWith('re_');
+}
+
+async function sendViaResendHttp(args: SendArgs): Promise<void> {
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${env.SMTP_PASS}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: env.SMTP_FROM,
+      to: [args.to],
+      subject: args.subject,
+      html: args.html,
+      text: args.text,
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => '<no body>');
+    logger.error(
+      { status: res.status, body, to: args.to, subject: args.subject },
+      'Resend HTTP API rejected email',
+    );
+    throw new Error(`Resend HTTP API ${res.status}: ${body}`);
+  }
+}
+
 export async function sendEmail(args: SendArgs): Promise<void> {
+  // Prefer Resend HTTP API when the configured password is a Resend key.
+  if (isResendApiKey(env.SMTP_PASS)) {
+    return sendViaResendHttp(args);
+  }
+
+  // Fall back to nodemailer SMTP for self-hosted / Gmail / etc.
   const info = await transport().sendMail({
     from: env.SMTP_FROM,
     to: args.to,
