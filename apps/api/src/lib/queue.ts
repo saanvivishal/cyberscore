@@ -122,12 +122,39 @@ export const queues = {
 // ------------------------------------------------------------
 // Convenience enqueuers — type-safe wrappers used by route handlers
 // ------------------------------------------------------------
+// NOTE: On serverless (Vercel) there is no background worker draining the
+// email queue, so we send emails inline via Resend SMTP. The function names
+// keep `enqueue*` for source compatibility with every existing call site —
+// they just no longer go through Redis. Resend's SMTP is fast enough (~200ms)
+// that we can afford to await within the API request.
 export async function enqueueOtpEmail(payload: Omit<EmailOtpJob, 'type'>): Promise<void> {
-  await queues.email().add('otp', { type: 'OTP', ...payload });
+  const { sendEmail, otpEmailTemplate } = await import('./email');
+  const { subject, html, text } = otpEmailTemplate({
+    orgName: payload.orgName,
+    code: payload.code,
+  });
+  try {
+    await sendEmail({ to: payload.email, subject, html, text });
+  } catch (err) {
+    logger.error({ err, to: payload.email }, 'Inline OTP email send failed');
+    throw err;
+  }
 }
 
 export async function enqueueInviteEmail(payload: Omit<EmailInviteJob, 'type'>): Promise<void> {
-  await queues.email().add('invite', { type: 'INVITE', ...payload });
+  const { sendEmail, inviteEmailTemplate } = await import('./email');
+  const { subject, html, text } = inviteEmailTemplate({
+    orgName: payload.orgName,
+    invitedByName: payload.invitedByName,
+    inviteUrl: payload.inviteUrl,
+    expiresAt: payload.expiresAt,
+  });
+  try {
+    await sendEmail({ to: payload.email, subject, html, text });
+  } catch (err) {
+    logger.error({ err, to: payload.email }, 'Inline invite email send failed');
+    throw err;
+  }
 }
 
 export async function enqueueSnapshot(payload: SnapshotJob): Promise<void> {
