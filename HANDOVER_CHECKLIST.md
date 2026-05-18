@@ -18,7 +18,7 @@ For the supervisor:
 - **Demo user:** `saanvi.vishal@iiitb.ac.in` / `cyberscore-demo-2026`  (verified SOLO admin, IIIT Bangalore org, Banking industry)
 - **Mobile APK download:** the Expo build artifact link is in [§14 Access & credentials](#14-access--credentials-transfer)
 - **GitHub repo:** https://github.com/saanvivishal/cyberscore
-- **Demo video:** see [§13 Demo & presentation](#13-demo--presentation) — recorded 2026-05-18
+- **Demo video:** [Watch on OneDrive](https://iiitbac-my.sharepoint.com/:v:/g/personal/saanvi_vishal_iiitb_ac_in/IQA6_RpGKPsHTp2JsEX8W6dVAdQG0jaFrzJQZSFKEfj32Wk?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=B6uqLC) (IIIT Bangalore SharePoint, recorded 2026-05-18)
 
 ---
 
@@ -254,7 +254,7 @@ A full sprint-by-sprint timeline of this 5-week build is in [docs/sprints.md](do
 |---|---|---|
 | Final report (PDF/DOC) | 🟡 | Source content lives across `docs/*.md` — combine into one PDF before handover email. Pandoc command: `pandoc docs/*.md -o cyberscore-final-report.pdf --toc`. |
 | Presentation slides (PPT) | 🟡 | **Saanvi to prepare** — recommended outline below |
-| Demo video | ✅ | Recorded 2026-05-18. File: `demo/cyberscore-demo-2026-05-18.mp4` (link to upload). Length: ~4 minutes. |
+| Demo video | ✅ | Recorded 2026-05-18, ~4-5 minutes. Hosted on IIIT Bangalore SharePoint: **[Watch on OneDrive](https://iiitbac-my.sharepoint.com/:v:/g/personal/saanvi_vishal_iiitb_ac_in/IQA6_RpGKPsHTp2JsEX8W6dVAdQG0jaFrzJQZSFKEfj32Wk?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=B6uqLC)**. Access scoped to IIITB tenant — Mohan Ram C should have view access via his FISST account; verify before sharing externally. |
 | Screenshots | ✅ | `demo/screenshots/` — onboarding, dashboard, assessment, scorecard, AI chat, team admin |
 
 ### Demo video walkthrough (what's shown)
@@ -466,7 +466,7 @@ The bullet list to run through right before emailing Mohan Ram C:
 - [x] Neon DB seeded with KPI catalogue + demo user
 - [x] Demo APK installed and tested on Samsung
 - [x] Demo video recorded (~4 min)
-- [ ] Demo video uploaded to YouTube / Google Drive; link in README + this file
+- [x] Demo video uploaded to IIITB SharePoint; link in README + this file
 - [ ] Slides + final report attached to the handover email
 - [ ] FISST account added as GitHub repo collaborator
 - [ ] All long-lived secrets rotated (see [§14](#14-access--credentials-transfer))

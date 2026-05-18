@@ -10,6 +10,7 @@
 ![Status: Live](https://img.shields.io/badge/Status-Live-success)
 
 🚀 **Live API:** https://cyberscore-api.vercel.app  ·  [Health check](https://cyberscore-api.vercel.app/api/v1/health)
+🎥 **Demo video:** [Watch on OneDrive](https://iiitbac-my.sharepoint.com/:v:/g/personal/saanvi_vishal_iiitb_ac_in/IQA6_RpGKPsHTp2JsEX8W6dVAdQG0jaFrzJQZSFKEfj32Wk?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=B6uqLC) (IIIT Bangalore SharePoint)
 📱 **Demo APK:** see latest EAS build in [docs/access-credentials.md](docs/access-credentials.md)
 🔑 **Demo login:** `saanvi.vishal@iiitb.ac.in` / `cyberscore-demo-2026`
 
