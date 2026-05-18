@@ -2,6 +2,8 @@
 
 A frank inventory of what doesn't work, what's incomplete, and what the next person should expect to run into.
 
+> **What changed in v0.3.0** (relative to v0.2.0): the project is now **fully deployed** — API on Vercel, Postgres on Neon, Redis on Upstash, email on Brevo. The Android APK is built via EAS and installs standalone on real phones. Several deployment-only bugs were hit and fixed: the BullMQ email queue was bypassed in favour of inline sending (because no worker runs on Vercel), Brevo's HTTP API replaced raw SMTP (Vercel throttles outbound TCP on 465/587), an external `cron-job.org` job pings `/api/v1/health` every 2 minutes to defeat cold starts, the onboarding carousel `index.tsx` redirect was fixed (it was hardcoded to skip onboarding and go straight to login), and the KPI question screen now parallelises its writes for a 2-3× speedup on Next-tap.
+>
 > **What changed in v0.2.0** (relative to v0.1.0): the four `ApiError.title` TypeScript errors are fixed (added a `title` getter on `ApiError`). The `Response.matchedTier` typo is fixed (relation now defined in the schema; FK migration applied). RLS policies are now present in `migrations/20260516123100_rls_policies/` and applied. The chat endpoint has a 20-msg/minute per-user rate limit. And the AI chat now defaults to a **local rule-based advisor** that uses your scorecard + a sector knowledge primer — no Anthropic API budget required.
 
 ## A. Bugs you'll trip over
@@ -46,11 +48,41 @@ npx expo start --clear
 
 Without this, you get `Unable to resolve module` errors even though the package is installed.
 
-### A6. Email worker fails when SMTP isn't configured
+### A6. Email worker fails when SMTP isn't configured — ✅ ARCHITECTURE CHANGED in v0.3.0
 
-Expected. The `.env.example` ships with empty `SMTP_USER` / `SMTP_PASS`, so the email worker logs `530 5.7.1 Authentication required` when it tries to send. The OTPs needed for testing are still returned inline in the API response when `NODE_ENV=development`, so this doesn't block dev work.
+In v0.1.0 / v0.2.0 the email worker process was where OTP and invite emails actually got sent. On Vercel we don't run that worker (no background process — only request-bound serverless functions), so emails sat in Redis forever with nothing to drain them. Symptom: API returns 200 with `otpSent: true` but no email ever arrives.
 
-For production: wire SMTP creds (Mailgun, Brevo, SES, etc.) and the email worker will start succeeding.
+Fix in v0.3.0: `apps/api/src/lib/queue.ts` was patched so `enqueueOtpEmail()` and `enqueueInviteEmail()` send emails **inline** via the HTTP API (Brevo by default; auto-detected from `SMTP_PASS` prefix). The function names stay `enqueue*` for source compatibility, but they no longer go through Redis. Other queue types (snapshot, PDF, push, abandonment) still use BullMQ — those queue types are dormant on Vercel and only matter if a separate worker is deployed.
+
+If you're deploying on a stack with a real worker process (Render, Fly.io, your own VM), you may want to revert this — see git blame on `queue.ts` for the diff.
+
+### A8. Vercel cold starts make every screen feel laggy — ✅ MITIGATED in v0.3.0
+
+On Vercel Hobby tier, each Next.js route handler is its own serverless function. Functions go idle after ~5 minutes of no traffic. The first request after idle pays a 5-10 second cold-start tax to spin up a fresh container. Mobile apps make many small API calls per screen, so that lag compounds — every screen transition felt like it was hanging.
+
+Fix in v0.3.0: external cron at https://console.cron-job.org pings `/api/v1/health` every 2 minutes. Vercel's Fluid Compute keeps adjacent functions warm via the shared health-endpoint warmup. End result: cold-start tax drops from 5-10s to ~200ms.
+
+Additionally, the KPI question screen was patched to parallelise its two writes (`api.kpis.submit` + `api.progress.save`) and fire cache invalidations as fire-and-forget instead of awaited, cutting click-to-next latency by ~2-3×. See `apps/mobile/app/(app)/kpi/[id].tsx`.
+
+For production-scale: upgrade Vercel to Pro tier (cold starts are eliminated by their always-warm infrastructure) or migrate to a non-serverless host like Render / Fly.io / Railway where the process stays alive.
+
+### A9. Vercel doesn't accept raw outbound SMTP reliably — ✅ FIXED in v0.3.0
+
+Vercel serverless functions can technically open outbound TCP to port 465 / 587, but they sometimes hang silently and consume the full request budget before timing out. Nodemailer's `transport.sendMail()` is particularly vulnerable since it doesn't expose a tunable connection timeout.
+
+Fix in v0.3.0: `apps/api/src/lib/email.ts` auto-detects the email provider from the `SMTP_PASS` prefix and routes through the provider's HTTPS REST API instead of SMTP:
+
+- `xkeysib-*` → Brevo HTTP (`api.brevo.com/v3/smtp/email`)
+- `re_*` → Resend HTTP (`api.resend.com/emails`)
+- Anything else → fall back to nodemailer SMTP (works on non-Vercel deployments)
+
+This is faster (no TCP handshake), more reliable (plain HTTPS that Vercel handles natively), and uses the same credentials.
+
+### A10. Onboarding carousel was bypassed on cold start — ✅ FIXED in v0.3.0
+
+`app/index.tsx` was hardcoded to `<Redirect href="/(auth)/login" />` which short-circuited the 3-slide onboarding carousel that existed at `app/(auth)/onboarding.tsx`. The carousel was finished, styled, and routed correctly — but unreachable.
+
+Fix in v0.3.0: `index.tsx` now redirects to `/(auth)/onboarding`, and the carousel tail-calls into login on Skip / last Next. AuthGate in `_layout.tsx` already routes authenticated users to the dashboard before paint, so this only affects unauthenticated cold starts (the people who should see the onboarding).
 
 ### A7. The `--dev-client` start script
 

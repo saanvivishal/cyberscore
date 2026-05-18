@@ -3,10 +3,15 @@
 > Cybersecurity health scorecard for organisations — self-assess 46 KPIs across People, Process, and Company; get personalised AI-guided remediation.
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Node](https://img.shields.io/badge/Node-20%2B-brightgreen)
+![Node](https://img.shields.io/badge/Node-22.x-brightgreen)
 ![Postgres](https://img.shields.io/badge/Postgres-16-blue)
 ![Expo SDK](https://img.shields.io/badge/Expo-SDK_52-black)
-![Next.js](https://img.shields.io/badge/Next.js-15.1-black)
+![Next.js](https://img.shields.io/badge/Next.js-15.5-black)
+![Status: Live](https://img.shields.io/badge/Status-Live-success)
+
+🚀 **Live API:** https://cyberscore-api.vercel.app  ·  [Health check](https://cyberscore-api.vercel.app/api/v1/health)
+📱 **Demo APK:** see latest EAS build in [docs/access-credentials.md](docs/access-credentials.md)
+🔑 **Demo login:** `saanvi.vishal@iiitb.ac.in` / `cyberscore-demo-2026`
 
 ---
 
@@ -180,9 +185,13 @@ See [docs/architecture.md](docs/architecture.md) for the full rationale.
 | See HLD + LLD with diagrams | [docs/system-design.md](docs/system-design.md) |
 | Know what the product does | [docs/requirements.md](docs/requirements.md) |
 | Set up the database | [docs/database.md](docs/database.md) |
-| Deploy to production | [docs/deployment.md](docs/deployment.md) |
+| Deploy to production *(now: an actual runbook for the live stack)* | [docs/deployment.md](docs/deployment.md) |
 | Know what's broken or incomplete | [docs/known-issues.md](docs/known-issues.md) |
 | Plan the next batch's work | [docs/roadmap.md](docs/roadmap.md) |
+| Read the sprint-by-sprint build history | [docs/sprints.md](docs/sprints.md) |
+| Find every external service + how to take it over | [docs/access-credentials.md](docs/access-credentials.md) |
+| Read the narrative of key decisions / lessons / tips | [docs/handover-notes.md](docs/handover-notes.md) |
+| Manually verify everything works | [docs/testing-manual.md](docs/testing-manual.md) |
 | Contribute | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | See what changed when | [CHANGELOG.md](CHANGELOG.md) |
 | Verify handover deliverables | [HANDOVER_CHECKLIST.md](HANDOVER_CHECKLIST.md) |
@@ -259,4 +268,4 @@ CyberScore began as a student capstone project at IIIT Bangalore, mentored by Mo
 
 ---
 
-**Status:** v0.1.0 — initial handover release. See [HANDOVER_CHECKLIST.md](HANDOVER_CHECKLIST.md) for deliverables status.
+**Status:** v0.3.0 — handover release. Project is **fully deployed and demoable**: API live on Vercel, Postgres on Neon (Singapore), Redis on Upstash (Singapore), email through Brevo. Demo APK runs standalone on Android. See [HANDOVER_CHECKLIST.md](HANDOVER_CHECKLIST.md) for deliverables status and [CHANGELOG.md](CHANGELOG.md) for what shipped in this release.

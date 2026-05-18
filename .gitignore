@@ -69,6 +69,10 @@ secrets/
 *.pem
 
 # Claude Code / Cursor / per-developer tool settings
-.claude/settings.local.json
+.claude/
 .cursorrules.local
+
+# Stray empty app.json at repo root — leftover from `eas init` run at the
+# wrong path. The real one lives in apps/mobile/app.json.
+/app.json
 
