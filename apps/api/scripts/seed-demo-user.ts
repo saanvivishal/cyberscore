@@ -1,11 +1,20 @@
 import argon2 from 'argon2';
 import { PrismaClient } from '@prisma/client';
 
-// Plants a verified SOLO admin user for demos against the live cloud DB.
+// Plants a verified ENTERPRISE admin user for demos against the live cloud DB.
+//
+// ENTERPRISE (not SOLO) so the dashboard shows the Company Rollup banner
+// with the MANAGE button. That banner gates on org.mode === ENTERPRISE
+// AND user.role === ADMIN — see apps/mobile/app/(app)/dashboard.tsx.
+// SOLO orgs deliberately hide the team management UI because there is no
+// team to manage.
+//
 // Usage:
 //   DATABASE_URL='...' npx tsx scripts/seed-demo-user.ts
 //
-// Idempotent — upserts by email.
+// Idempotent — upserts by email. Re-running flips an existing SOLO demo
+// org to ENTERPRISE (the `update` branch now sets mode too, not just the
+// create branch).
 async function main() {
   const prisma = new PrismaClient();
 
@@ -24,6 +33,9 @@ async function main() {
   });
 
   // Upsert the org. Email is unique on Organisation.
+  // joinMode defaults to INVITE_ONLY (admin must explicitly invite each
+  // employee). frameworkLocked is left false so the demo admin can still
+  // switch frameworks from the Profile screen.
   const org = await prisma.organisation.upsert({
     where: { email },
     update: {
@@ -31,6 +43,7 @@ async function main() {
       industry,
       isVerified: true,
       passwordHash,
+      mode: 'ENTERPRISE',
     },
     create: {
       email,
@@ -39,7 +52,7 @@ async function main() {
       isVerified: true,
       passwordHash,
       selectedFramework: 'EXCEL',
-      mode: 'SOLO',
+      mode: 'ENTERPRISE',
     },
     select: { id: true },
   });
