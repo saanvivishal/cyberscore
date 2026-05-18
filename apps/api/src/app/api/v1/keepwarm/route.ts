@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// GET /api/v1/_warm
+// GET /api/v1/keepwarm
 //
 // Internal keep-warm endpoint. Hit by the cron-job.org cron every 2 minutes.
+// (The folder was originally _warm but Next.js App Router treats folders
+// starting with an underscore as private and silently excludes them from
+// routing. Renamed to keepwarm so the route actually resolves.)
 // It does two things:
 //
 //   1. Runs a real (cheap) Postgres query so Neon's compute does not scale
