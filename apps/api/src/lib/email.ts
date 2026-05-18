@@ -38,12 +38,60 @@ export interface SendArgs {
 // Outbound SMTP from Vercel serverless is flaky — Vercel sometimes
 // blocks/throttles raw TCP on 25/465/587, which leaves nodemailer hung
 // for 30+ seconds before timing out (Vercel kills the function before
-// then and the caller sees a 500). If the configured SMTP_PASS looks
-// like a Resend API key (`re_...`) we route through Resend's HTTPS
-// REST API instead — same credentials, same sender, but a plain
-// fetch() which Vercel handles reliably and in ~200ms.
+// then and the caller sees a 500). To keep deployment options open we
+// auto-detect the provider from SMTP_PASS and route through its HTTPS
+// REST API instead — a plain fetch() which Vercel handles reliably
+// in ~200ms.
+//
+// Supported providers (auto-detected by SMTP_PASS prefix):
+//   xkeysib-* → Brevo (300 emails/day free, no domain required —
+//                       what we use in production)
+//   re_*      → Resend (kept for fallback / portability)
+//
+// Anything else → falls through to nodemailer SMTP (Postfix, Gmail,
+// self-hosted etc.) for non-Vercel deployments.
+
+function isBrevoApiKey(pass: string | undefined): pass is string {
+  return !!pass && pass.startsWith('xkeysib-');
+}
+
 function isResendApiKey(pass: string | undefined): pass is string {
   return !!pass && pass.startsWith('re_');
+}
+
+// Brevo wants the sender as a structured {name, email} object, not a
+// raw RFC-822 "Name <addr>" string. Parse our SMTP_FROM accordingly.
+function parseSenderHeader(from: string): { name?: string; email: string } {
+  const match = from.match(/^\s*(.+?)\s*<\s*([^>]+)\s*>\s*$/);
+  if (match) return { name: match[1].trim(), email: match[2].trim() };
+  return { email: from.trim() };
+}
+
+async function sendViaBrevoHttp(args: SendArgs): Promise<void> {
+  const sender = parseSenderHeader(env.SMTP_FROM);
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'api-key': env.SMTP_PASS as string,
+      'Content-Type': 'application/json',
+      accept: 'application/json',
+    },
+    body: JSON.stringify({
+      sender,
+      to: [{ email: args.to }],
+      subject: args.subject,
+      htmlContent: args.html,
+      textContent: args.text,
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => '<no body>');
+    logger.error(
+      { status: res.status, body, to: args.to, subject: args.subject },
+      'Brevo HTTP API rejected email',
+    );
+    throw new Error(`Brevo HTTP API ${res.status}: ${body}`);
+  }
 }
 
 async function sendViaResendHttp(args: SendArgs): Promise<void> {
@@ -72,7 +120,10 @@ async function sendViaResendHttp(args: SendArgs): Promise<void> {
 }
 
 export async function sendEmail(args: SendArgs): Promise<void> {
-  // Prefer Resend HTTP API when the configured password is a Resend key.
+  // Route to the right provider based on the API key shape.
+  if (isBrevoApiKey(env.SMTP_PASS)) {
+    return sendViaBrevoHttp(args);
+  }
   if (isResendApiKey(env.SMTP_PASS)) {
     return sendViaResendHttp(args);
   }
