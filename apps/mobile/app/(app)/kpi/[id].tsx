@@ -98,17 +98,27 @@ export default function KpiQuestion() {
         if (!tier) throw new Error('Pick an option first');
         inputValue = inputValueForTier(tier.condition, tier.tierLabel);
       }
-      await api.kpis.submit({ kpiId: kpi.id, inputValue });
       const nextIndex = index + 1;
       const status = nextIndex >= byLevel.length ? 'COMPLETED' : 'IN_PROGRESS';
-      await api.progress.save({ level, lastQuestionIndex: nextIndex, status });
+
+      // Fire both writes in parallel — `progress.save` doesn't depend on
+      // the response of `kpis.submit` (nextIndex is computed client-side),
+      // so we don't need to wait for the first before starting the second.
+      // Cuts the click-to-next latency roughly in half on warm Vercel and
+      // makes a much bigger difference under cold-start.
+      await Promise.all([
+        api.kpis.submit({ kpiId: kpi.id, inputValue }),
+        api.progress.save({ level, lastQuestionIndex: nextIndex, status }),
+      ]);
       return { nextIndex, status };
     },
-    onSuccess: async ({ nextIndex, status }, vars) => {
-      await Promise.all([
-        qc.invalidateQueries({ queryKey: ['scorecard'] }),
-        qc.invalidateQueries({ queryKey: ['progress'] }),
-      ]);
+    onSuccess: ({ nextIndex, status }, vars) => {
+      // Fire-and-forget the cache invalidations — the next screen pulls
+      // fresh data via its own queries when it mounts; we don't need to
+      // block this navigation on the invalidation round-trip.
+      void qc.invalidateQueries({ queryKey: ['scorecard'] });
+      void qc.invalidateQueries({ queryKey: ['progress'] });
+
       if (!vars.advance) {
         router.replace('/(app)/assessment');
         return;
