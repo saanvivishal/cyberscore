@@ -2,9 +2,13 @@
 
 All notable changes to CyberScore are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+# Changelog
 
-Polish and live-fix pass made after the 0.3.0 demo recording. These are the changes that landed between the demo video being filmed and the final handover. Most are small but matter for the supervisor's first run-through of the app.
+All notable changes to CyberScore are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.3.1] (2026-05-19)
+
+Polish and live-fix pass made after the 0.3.0 demo recording. These are the changes that landed between the demo video being filmed and the final handover email. Most are small but they matter for the supervisor's first run-through of the app.
 
 ### Added
 - **Keep-warm endpoint** at `/api/v1/keepwarm` (`apps/api/src/app/api/v1/keepwarm/route.ts`). One HTTP call warms eight dashboard lambdas in parallel and runs a cheap `SELECT 1` against Postgres so Neon's free-tier compute does not scale to zero. The cron-job.org cron now hits this endpoint every two minutes instead of just `/api/v1/health`.
@@ -15,8 +19,9 @@ Polish and live-fix pass made after the 0.3.0 demo recording. These are the chan
 - **Login rate limit bumped from 5 to 30 attempts per IP per 15 minutes.** The old 5-per-15-min limit kept blocking honest testers who fumbled the password a couple of times. 30 still defeats any realistic brute force (a real attacker runs thousands per minute, not dozens). The value is hardcoded in the login route handler instead of read from env, so a stale Vercel env var cannot silently re-lower it.
 
 ### Fixed
-- **App felt slow on every screen, every transition.** Root cause was a mix of Vercel running our function in a US region and only `/health` being warmed by the cron. Combined effect of the region pin plus the new keep-warm endpoint dropped warm-state latency from 3 to 8 seconds per request to well under 1 second. From a phone in Bangalore the round trip is even shorter than that.
+- **App felt slow on every screen and every transition.** Root cause was a mix of Vercel running our function in a US region and only `/health` being warmed by the cron. Combined effect of the region pin plus the new keep-warm endpoint dropped warm-state latency from 3 to 8 seconds per request down to well under 1 second. From a phone in Bangalore the round trip is even shorter.
 - **MANAGE button missing on the dashboard in the installed APK.** The demo user was seeded as SOLO. Re-seeded as ENTERPRISE against the live Neon database. Verified with `/api/v1/auth/me` returning `org.mode: "ENTERPRISE"`.
+
 
 ## [0.3.0] (2026-05-18)
 
