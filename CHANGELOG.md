@@ -2,10 +2,6 @@
 
 All notable changes to CyberScore are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# Changelog
-
-All notable changes to CyberScore are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 ## [0.3.1] (2026-05-19)
 
 Polish and live-fix pass made after the 0.3.0 demo recording. These are the changes that landed between the demo video being filmed and the final handover email. Most are small but they matter for the supervisor's first run-through of the app.
