@@ -1,6 +1,6 @@
 # Handover Checklist
 
-This document maps the 20 sections from `Project Handover Checklist.docx` (shared by Mohan Ram C) to the actual state of the CyberScore project. Every section gives a one-word status, a short summary of what was done in that area, and a link to the deeper documentation file when there is one.
+This document maps the 20 sections maps to the actual state of the CyberScore project. Every section gives a one-word status, a short summary of what was done in that area, and a link to the deeper documentation file when there is one.
 
 **Status words used in this document:**
 - Done: shipped and verified.
@@ -8,7 +8,6 @@ This document maps the 20 sections from `Project Handover Checklist.docx` (share
 - Not started: nothing built for this item yet.
 - Deferred: deliberately skipped with a reason given.
 
-**Document version:** v0.3.1, finalised 2026-05-19. The latest release tag in git is `v0.3.0` (handover demo). The 0.3.1 fixes (Singapore region pin, keepwarm endpoint, demo user mode flip, login rate limit bump) are committed but not yet tagged.
 
 **Live URL:** https://cyberscore-api.vercel.app
 
