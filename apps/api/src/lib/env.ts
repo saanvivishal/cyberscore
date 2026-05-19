@@ -42,7 +42,13 @@ const envSchema = z.object({
 
   SENTRY_DSN: z.string().optional(),
 
-  RATE_LIMIT_LOGIN_MAX: z.coerce.number().int().default(5),
+  // Login rate limit. Bumped from 5 to 30 per 15 min per IP because the
+  // demo scenario keeps tripping the old limit when the supervisor or
+  // tester retries quickly. 30 still kills any realistic brute force
+  // attempt (a real attacker would be running thousands per minute, not
+  // dozens), but is forgiving enough that an honest human typing the
+  // password a few times in a hurry will not get locked out.
+  RATE_LIMIT_LOGIN_MAX: z.coerce.number().int().default(30),
   RATE_LIMIT_LOGIN_WINDOW_MS: z.coerce.number().int().default(15 * 60 * 1000),
 
   AI_FREE_DAILY_CALLS: z.coerce.number().int().default(20),

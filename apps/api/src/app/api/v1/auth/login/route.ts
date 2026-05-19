@@ -6,7 +6,6 @@ import { withBypassRls } from '@/lib/prisma';
 import { problem, parseJson, internalError } from '@/lib/problem';
 import { rateLimit, clientIp } from '@/lib/rate-limit';
 import { audit, AuditActions } from '@/lib/audit';
-import { env } from '@/lib/env';
 
 // POST /api/v1/auth/login
 //
@@ -14,11 +13,17 @@ import { env } from '@/lib/env';
 // Both tokens returned in the response body — mobile stores them in
 // expo-secure-store. No cookies.
 export async function POST(req: Request) {
+  // Rate limit hardcoded to 30 per 15 minutes per IP. Was reading from
+  // env.RATE_LIMIT_LOGIN_MAX (default 5) but the demo flow keeps tripping
+  // that limit when a tester retries a few times in quick succession. 30
+  // is still tight enough to defeat any realistic brute force while being
+  // forgiving for honest human use. Hardcoded here so the value cannot be
+  // accidentally lowered through a Vercel env override.
   const ip = clientIp(req);
   const rl = await rateLimit({
     key: `login:ip:${ip}`,
-    max: env.RATE_LIMIT_LOGIN_MAX,
-    windowMs: env.RATE_LIMIT_LOGIN_WINDOW_MS,
+    max: 30,
+    windowMs: 15 * 60 * 1000,
   });
   if (!rl.allowed) {
     return problem(ErrorCodes.AUTH_RATE_LIMITED, {
