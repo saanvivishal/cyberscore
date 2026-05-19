@@ -1,6 +1,6 @@
 # Deployment
 
-> **Status: LIVE in production as of 2026-05-18.** This document describes the **actual deployed setup** of CyberScore — not a plan. The API is running on Vercel, the database on Neon, Redis on Upstash, email via Brevo, and the Android APK is built and distributed through Expo EAS. Everything described here has been executed, verified, and used in the demo recording.
+> **Status: LIVE in production as of 2026-05-18.** This document describes the **actual deployed setup** of CyberScore, not a plan. The API is running on Vercel, the database on Neon, Redis on Upstash, email via Brevo, and the Android APK is built and distributed through Expo EAS. Everything described here has been executed, verified, and used in the demo recording.
 >
 > If the next batch deploys to a different stack, please update this document to reflect their changes instead of layering new options on top.
 
@@ -9,7 +9,7 @@
 | Surface | URL | Free tier |
 |---|---|---|
 | API | https://cyberscore-api.vercel.app | Vercel Hobby (free) |
-| API health | https://cyberscore-api.vercel.app/api/v1/health | — |
+| API health | https://cyberscore-api.vercel.app/api/v1/health |, |
 | Database | Neon Postgres, Singapore region (`ap-southeast-1`) | Neon Free (3 GB storage, 1 compute hour/day) |
 | Redis | Upstash Redis, Singapore region (`ap-southeast-1`) | Upstash Free (10k commands/day) |
 | Email delivery | Brevo HTTP API (`api.brevo.com/v3/smtp/email`) | Brevo Free (300 emails/day) |
@@ -22,9 +22,9 @@ Total monthly cost at handover: **$0**. All services on free tiers.
 
 Three independently deployed components:
 
-1. **API** (Next.js 15) — stateless route handlers running as Vercel serverless functions
-2. **Mobile APK** (Expo SDK 52) — Android package, distributed as a direct download from EAS Build
-3. **Background workers** — *not currently deployed.* The original design had a separate BullMQ worker process for email / snapshot / push / abandonment, but on Vercel-only deployments emails are sent inline (no worker needed) and the snapshot job runs synchronously in the request that triggers it. Other queue types (push, abandonment) are dormant — wire them up to a Render Background Worker or Fly.io machine if the corresponding features are ever needed.
+1. **API** (Next.js 15), stateless route handlers running as Vercel serverless functions
+2. **Mobile APK** (Expo SDK 52), Android package, distributed as a direct download from EAS Build
+3. **Background workers**: *not currently deployed.* The original design had a separate BullMQ worker process for email / snapshot / push / abandonment, but on Vercel-only deployments emails are sent inline (no worker needed) and the snapshot job runs synchronously in the request that triggers it. Other queue types (push, abandonment) are dormant, wire them up to a Render Background Worker or Fly.io machine if the corresponding features are ever needed.
 
 Plus three managed services (Neon, Upstash, Brevo).
 
@@ -34,7 +34,7 @@ Plus three managed services (Neon, Upstash, Brevo).
 
 If you're cloning the repo and standing up your own deployment, follow these steps in order.
 
-### Step 1 — Postgres on Neon
+### Step 1, Postgres on Neon
 
 1. Sign up at https://neon.tech with your work email. Free tier, no credit card.
 2. Create a project: pick **Singapore (`ap-southeast-1`)** or whichever region matches your users. Region affects latency.
@@ -43,7 +43,7 @@ If you're cloning the repo and standing up your own deployment, follow these ste
    - **Direct** (used by Prisma migrations): same host, no `pooler` keyword
 4. Save these as `DATABASE_URL` and `DIRECT_DATABASE_URL` for Step 5.
 
-### Step 2 — Redis on Upstash
+### Step 2, Redis on Upstash
 
 1. Sign up at https://upstash.com. Free tier.
 2. Create a Redis database: pick the same region as your Neon DB (Singapore). Eviction policy: `noeviction`.
@@ -51,7 +51,7 @@ If you're cloning the repo and standing up your own deployment, follow these ste
    - **Not** the HTTP REST URL. We use the standard Redis wire protocol via `ioredis`.
 4. Save as `REDIS_URL`.
 
-### Step 3 — Email via Brevo
+### Step 3, Email via Brevo
 
 1. Sign up at https://www.brevo.com. Free tier (300 emails/day, no credit card).
 2. During signup, your email is automatically verified as a sender.
@@ -60,7 +60,7 @@ If you're cloning the repo and standing up your own deployment, follow these ste
 5. Copy the key (starts with `xkeysib-...`). Brevo only shows it once.
 6. Save as `SMTP_PASS`.
 
-> **Note:** We send email via Brevo's **HTTP API**, not SMTP. Vercel serverless functions are unreliable for raw outbound TCP on port 465/587 — they sometimes hang for the function's full execution budget. The `apps/api/src/lib/email.ts` file auto-detects Brevo API keys (prefix `xkeysib-`) and routes through `https://api.brevo.com/v3/smtp/email`. SMTP credentials are also configured but unused at runtime.
+> **Note:** We send email via Brevo's **HTTP API**, not SMTP. Vercel serverless functions are unreliable for raw outbound TCP on port 465/587, they sometimes hang for the function's full execution budget. The `apps/api/src/lib/email.ts` file auto-detects Brevo API keys (prefix `xkeysib-`) and routes through `https://api.brevo.com/v3/smtp/email`. SMTP credentials are also configured but unused at runtime.
 
 The other "SMTP" env vars are still required by the code's Zod env validation, but their values don't matter when a Brevo API key is set:
 
@@ -72,7 +72,7 @@ SMTP_PASS=xkeysib-your-key-here    # this is what matters
 SMTP_FROM=CyberScore <noreply@yourdomain.com>  # display name; Brevo rewrites the email part
 ```
 
-### Step 4 — Vercel API deployment
+### Step 4, Vercel API deployment
 
 1. Push the repo to GitHub.
 2. Sign up at https://vercel.com with your GitHub account.
@@ -89,7 +89,7 @@ SMTP_FROM=CyberScore <noreply@yourdomain.com>  # display name; Brevo rewrites th
 
 The custom domain `cyberscore-api.vercel.app` is auto-assigned; you can attach a custom domain later in Project Settings → Domains.
 
-### Step 5 — Environment variables
+### Step 5, Environment variables
 
 Production env vars (set in Vercel Project Settings):
 
@@ -148,7 +148,7 @@ node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"  
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"          # TOTP (must be exactly 64 hex chars)
 ```
 
-### Step 6 — Run migrations against Neon
+### Step 6, Run migrations against Neon
 
 From your laptop, with `DATABASE_URL` and `DIRECT_DATABASE_URL` pointing at Neon:
 
@@ -160,15 +160,15 @@ DIRECT_DATABASE_URL="postgresql://...neon.tech/neondb?sslmode=require" \
 
 This applies all migrations in `apps/api/prisma/migrations/` in order:
 
-1. `20260423115340_init` — base 21-table schema
-2. `20260429000000_enterprise_mode` — added OrgMode / JoinMode / AnswerScope, invites, enterprise org fields
-3. `20260429000001_per_user_progress` — moved `assessment_progress` from org-keyed to (org, user)-keyed
-4. `20260506080246_add_allowed_levels` — added `User.allowedLevels` and `Invite.allowedLevels`
-5. `20260516074342_add_chat_threads` — chat thread + chat message tables
-6. `20260516123040_add_response_matched_tier_relation` — added FK Response → ScoringTier (with orphan cleanup)
-7. `20260516123100_rls_policies` — enabled Row-Level Security on 19 tenant-scoped tables
+1. `20260423115340_init`, base 21-table schema
+2. `20260429000000_enterprise_mode`, added OrgMode / JoinMode / AnswerScope, invites, enterprise org fields
+3. `20260429000001_per_user_progress`, moved `assessment_progress` from org-keyed to (org, user)-keyed
+4. `20260506080246_add_allowed_levels`, added `User.allowedLevels` and `Invite.allowedLevels`
+5. `20260516074342_add_chat_threads`, chat thread + chat message tables
+6. `20260516123040_add_response_matched_tier_relation`, added FK Response → ScoringTier (with orphan cleanup)
+7. `20260516123100_rls_policies`, enabled Row-Level Security on 19 tenant-scoped tables
 
-### Step 7 — Seed the KPI catalogue
+### Step 7, Seed the KPI catalogue
 
 ```bash
 cd apps/api
@@ -178,7 +178,7 @@ DATABASE_URL="postgresql://...pooler.../neondb?sslmode=require" \
 
 This populates 46 KPIs + 212 scoring tiers + 92 personalised remediation suggestions (extracted from `SCORE CARD_KPI_CYBER SEC_PPT_V0.9.xlsx`).
 
-### Step 8 — Plant the demo user
+### Step 8, Plant the demo user
 
 ```bash
 cd apps/api
@@ -186,7 +186,7 @@ DATABASE_URL="postgresql://...pooler.../neondb?sslmode=require" \
   npx tsx scripts/seed-demo-user.ts
 ```
 
-This creates `saanvi.vishal@iiitb.ac.in` / `cyberscore-demo-2026` as a verified SOLO admin in the "IIIT Bangalore" org (Banking industry). Idempotent — re-running just updates the row. Customise the email/password via env vars:
+This creates `saanvi.vishal@iiitb.ac.in` / `cyberscore-demo-2026` as a verified SOLO admin in the "IIIT Bangalore" org (Banking industry). Idempotent, re-running just updates the row. Customise the email/password via env vars:
 
 ```bash
 DEMO_EMAIL=test@example.com \
@@ -197,7 +197,7 @@ DEMO_NAME='Test User' \
   npx tsx scripts/seed-demo-user.ts
 ```
 
-### Step 9 — Verify the API
+### Step 9, Verify the API
 
 ```bash
 curl -s https://cyberscore-api.vercel.app/api/v1/health | jq
@@ -216,9 +216,9 @@ Expected response:
 }
 ```
 
-If any check returns `"fail"`, that service isn't reachable — review the env var for that service.
+If any check returns `"fail"`, that service isn't reachable, review the env var for that service.
 
-### Step 10 — Set up the keep-warm cron
+### Step 10, Set up the keep-warm cron
 
 Vercel's Hobby tier shuts down idle serverless functions after ~5 minutes. The first request after idle pays a 5-10 second cold-start tax, which kills the demo experience. Mitigation: an external cron pings the health endpoint every 2 minutes to keep functions warm.
 
@@ -234,7 +234,7 @@ Vercel's Hobby tier shuts down idle serverless functions after ~5 minutes. The f
 
 This single cron also incidentally warms most other serverless functions on Vercel because their Fluid Compute feature shares warm instances across routes within a project. For maximum warmth across all routes, you can add additional cron jobs (cron-job.org free tier supports unlimited jobs).
 
-### Step 11 — Build the mobile APK
+### Step 11, Build the mobile APK
 
 Build the Android APK from `apps/mobile/` using EAS Build:
 
@@ -253,8 +253,8 @@ eas build --platform android --profile preview
 ```
 
 `eas.json` already defines:
-- `preview` profile — produces an APK suitable for sideload (used for demo + internal testing)
-- `production` profile — produces an AAB suitable for Play Store
+- `preview` profile, produces an APK suitable for sideload (used for demo + internal testing)
+- `production` profile, produces an AAB suitable for Play Store
 
 Both profiles bake `EXPO_PUBLIC_API_URL=https://cyberscore-api.vercel.app` into the bundle so the APK talks to the live API.
 
@@ -263,11 +263,11 @@ Build runs in Expo's cloud (~12-15 min). When done, you get a download URL like 
 - **For supervisors / internal testers:** share the URL or QR code. They open it on their phone's Chrome → Download → Install. Android will ask "Install from unknown sources?" once → tap **Allow** → install completes.
 - **For Play Store:** use the `production` profile then `eas submit --platform android --latest`.
 
-### Step 12 — Verify the APK
+### Step 12, Verify the APK
 
 Install on a real Android phone (an emulator works too). After install:
 
-1. Onboarding carousel appears (3 slides — Security Scans / Live Scorecard / AI Insights)
+1. Onboarding carousel appears (3 slides, Security Scans / Live Scorecard / AI Insights)
 2. Tap Skip or Next-Next-Next → Login screen
 3. Enter `saanvi.vishal@iiitb.ac.in` / `cyberscore-demo-2026`
 4. Tap Login → Dashboard hydrates with the IIIT Bangalore org's scorecard
@@ -277,7 +277,7 @@ Install on a real Android phone (an emulator works too). After install:
 8. Tap **Forgot password?** → enter email → submit → check IIITB Outlook (an OTP arrives via Brevo within 10 seconds)
 9. Enter OTP → set new password → log back in
 
-If all 9 steps work, the deployment is complete. ✅
+If all 9 steps work, the deployment is complete. Done
 
 ---
 
@@ -299,7 +299,7 @@ DIRECT_DATABASE_URL='postgresql://...neon.tech/neondb?sslmode=require' \
   npx prisma migrate deploy
 ```
 
-This is by design — running migrations from CI would let any preview deployment touch the production database. Manual is safer for a small team.
+This is by design, running migrations from CI would let any preview deployment touch the production database. Manual is safer for a small team.
 
 For a next-batch CI improvement: add a GitHub Actions workflow that runs migrations against a staging Neon project on PR + against production only after manual approval.
 
@@ -307,7 +307,7 @@ For a next-batch CI improvement: add a GitHub Actions workflow that runs migrati
 
 Two paths depending on whether the change touches native code:
 
-- **JavaScript-only changes** (UI, state, anything not involving native modules): use `eas update --branch preview --message "..."` which pushes an Over-The-Air update. Users on the latest binary pick it up on the next app launch — no reinstall.
+- **JavaScript-only changes** (UI, state, anything not involving native modules): use `eas update --branch preview --message "..."` which pushes an Over-The-Air update. Users on the latest binary pick it up on the next app launch, no reinstall.
 - **Native changes** (new permissions, new native module, native config): full rebuild required via `eas build`. Users must download + install the new APK.
 
 The current handover build uses the static (non-OTA) channel. If the next batch wants OTA, configure `EAS Update` in `eas.json` and run `eas update:configure`.
@@ -332,7 +332,7 @@ Vercel bakes env vars into the build, so the new value only applies after a fres
 | Service | Backup strategy | Restore procedure |
 |---|---|---|
 | Neon Postgres | Neon's built-in point-in-time recovery (7 days of WAL retention on Free tier) | Neon dashboard → Branches → restore to a new branch from any moment in the last 7 days |
-| Upstash Redis | No backups needed — Redis state is reconstructible (queue jobs replay, rate-limit windows are short-lived, no durable data) | n/a |
+| Upstash Redis | No backups needed, Redis state is reconstructible (queue jobs replay, rate-limit windows are short-lived, no durable data) | n/a |
 | Brevo email logs | Brevo retains send history for 30 days on free tier | Dashboard → Transactional → Statistics |
 | R2 / S3 evidence | When wired: enable versioning on the bucket; lifecycle rule for 90-day version retention | Bucket history |
 
@@ -347,7 +347,7 @@ What's in place at handover:
 - **Logs:** Vercel Functions tab streams the function's stdout. Pino emits structured JSON, so logs are queryable in Vercel's UI by JSON keys (route, level, msg, err).
 - **Health checks:** `/api/v1/health` validates DB + Redis. External monitor (cron-job.org) hits it every 2 minutes and would alert via email if it ever returned non-200.
 
-What's missing — leave for the next batch:
+What's missing, leave for the next batch:
 
 - **Errors:** Sentry is wired in `apps/api/instrumentation.ts` but `SENTRY_DSN` is unset, so errors only go to logs. Add a free Sentry account + paste the DSN to capture exceptions with stack traces.
 - **Metrics:** No metrics pipeline. Recommended: OpenTelemetry SDK (env var `OTEL_EXPORTER_OTLP_ENDPOINT` already supported in env.ts) → Grafana Cloud or Honeycomb free tier.
@@ -367,7 +367,7 @@ What's missing — leave for the next batch:
 
 ---
 
-## Cost projection — for context
+## Cost projection, for context
 
 The handover deployment runs on **$0/month** thanks to free tiers. For comparison, a real production stack at ~1000 active orgs would look like:
 
@@ -380,17 +380,17 @@ The handover deployment runs on **$0/month** thanks to free tiers. For compariso
 | Upstash (Redis) | Pay-as-you-go | ~$10 |
 | Brevo (email) | Lite | $9 (20k emails/month) |
 | Cloudflare R2 (evidence storage) | Pay-as-you-go | ~$5 |
-| Anthropic API (chat) | Pay-as-you-go | Variable — see daily budget guard |
+| Anthropic API (chat) | Pay-as-you-go | Variable, see daily budget guard |
 | Sentry | Team | $26 |
 | Expo EAS | Production | $99 |
 | cron-job.org | Free | $0 |
 | **Total** | | **~$190/mo + AI usage** |
 
-The local rule-based advisor (currently default — `USE_LOCAL_ADVISOR=true`) means **AI cost = $0**. Switch to Anthropic Sonnet when you want richer responses; the daily budget guard caps spend. With prompt caching on the system block (containing the scorecard JSON), per-chat-turn cost after the first turn within the 5-min cache window drops to fractions of a cent.
+The local rule-based advisor (currently default, `USE_LOCAL_ADVISOR=true`) means **AI cost = $0**. Switch to Anthropic Sonnet when you want richer responses; the daily budget guard caps spend. With prompt caching on the system block (containing the scorecard JSON), per-chat-turn cost after the first turn within the 5-min cache window drops to fractions of a cent.
 
 ---
 
-## CI/CD — to be added by the next batch
+## CI/CD, to be added by the next batch
 
 There is **no GitHub Actions workflow yet** because there are no tests to run. The deployment pipeline today is:
 
@@ -491,7 +491,7 @@ Fix: external cron at https://console.cron-job.org pings `/api/v1/health` every 
 
 Cause: the user's `passwordHash` in the database is from a different Argon2 cost, or the user doesn't exist in the deployment target's database (e.g. you seeded local DB but the API is hitting Neon).
 
-Fix: run `apps/api/scripts/seed-demo-user.ts` against the actual production DATABASE_URL. The script is idempotent — re-running just upserts the hash with the current code.
+Fix: run `apps/api/scripts/seed-demo-user.ts` against the actual production DATABASE_URL. The script is idempotent, re-running just upserts the hash with the current code.
 
 ---
 

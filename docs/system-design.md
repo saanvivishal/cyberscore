@@ -46,7 +46,7 @@ flowchart TB
 | **AI** | `apps/api/src/app/api/v1/ai/*` + `lib/ai.ts` | One-shot scorecard comparison; streaming chat advisor (SSE) with prompt caching |
 | **Evidence** | `apps/api/src/app/api/v1/evidence/*` + `lib/storage.ts` | S3/R2 presigned URL flow for file uploads attached to responses |
 | **Notifications** | `apps/api/src/app/api/v1/notifications/*` + `lib/push.ts` | In-app inbox + push delivery via Expo |
-| **Workers** | `apps/api/src/workers/*` | Email sender, snapshot writer, push sender, abandonment detector — all BullMQ consumers |
+| **Workers** | `apps/api/src/workers/*` | Email sender, snapshot writer, push sender, abandonment detector, all BullMQ consumers |
 | **Mobile UI** | `apps/mobile/app/*` | Auth screens, dashboard, assessment flow, analytics, AI chat, profile, team admin |
 | **Shared SDK** | `packages/sdk` | TypeScript client with auto-refresh, abort support, typed error mapping |
 | **Shared types** | `packages/types` | Zod schemas used by both API + mobile |
@@ -64,7 +64,7 @@ flowchart TB
 
 ## Critical end-to-end flows
 
-### Flow 1 — New SOLO user onboarding
+### Flow 1, New SOLO user onboarding
 
 ```mermaid
 sequenceDiagram
@@ -94,7 +94,7 @@ sequenceDiagram
   Note over M: SecureStore.set; navigate to dashboard
 ```
 
-### Flow 2 — Streaming AI chat (with prompt caching)
+### Flow 2, Streaming AI chat (with prompt caching)
 
 ```mermaid
 sequenceDiagram
@@ -131,7 +131,7 @@ sequenceDiagram
 
 **Cache behaviour:** On the second turn within 5 minutes, the entire `[base advisor prompt + scorecard JSON]` prefix hits the Anthropic prompt cache. `usage.cache_read_input_tokens` jumps from 0 to ~3000; you pay 0.1× on those tokens.
 
-### Flow 3 — Enterprise admin invites employee with restricted levels
+### Flow 3, Enterprise admin invites employee with restricted levels
 
 ```mermaid
 sequenceDiagram
@@ -162,7 +162,7 @@ sequenceDiagram
   Note over AM: Lands on dashboard; only People tile visible
 ```
 
-### Flow 4 — Assessment + automatic snapshot
+### Flow 4, Assessment + automatic snapshot
 
 ```mermaid
 sequenceDiagram
@@ -198,7 +198,7 @@ sequenceDiagram
 
 The heart of the product. Three concerns separated:
 
-### `scoring.ts` — single-response matching
+### `scoring.ts`, single-response matching
 
 ```typescript
 scoreResponse({ inputValue, tiers, maxScore, weightage }) → {
@@ -210,7 +210,7 @@ scoreResponse({ inputValue, tiers, maxScore, weightage }) → {
 
 Tiers store a JSON condition `{op: '>=' | '>' | '==', value: number}`. Matching iterates `tiers` in descending `tierOrder` and returns the first match. Non-numeric inputs (dropdown labels) match on equality.
 
-### `scorecard.ts` — aggregation
+### `scorecard.ts`, aggregation
 
 ```typescript
 aggregate(kpis, responses) → {
@@ -223,13 +223,13 @@ aggregate(kpis, responses) → {
 
 Key formulas:
 - **Level score** = `sum(weightedScore) / sum(maxScore * weightage) * 100` for that level
-- **Overall** is the same calc across *all* KPIs, not the average of the three level scores — a level with one heavy KPI shouldn't dominate the simple average
+- **Overall** is the same calc across *all* KPIs, not the average of the three level scores, a level with one heavy KPI shouldn't dominate the simple average
 - **Completeness** = `answeredCount / totalCount * 100`
-- **N/A handling** — N/A responses are excluded from both numerator and denominator (they neither help nor hurt)
-- **Unanswered** — count toward the denominator (user is losing points by not answering, not getting a free 100%)
-- **Color bands** — RED < 50, AMBER 50–79, GREEN ≥ 80
+- **N/A handling**. N/A responses are excluded from both numerator and denominator (they neither help nor hurt)
+- **Unanswered**: count toward the denominator (user is losing points by not answering, not getting a free 100%)
+- **Color bands**. RED < 50, AMBER 50 to 79, GREEN ≥ 80
 
-### `scorecard.ts` — enterprise rollup
+### `scorecard.ts`, enterprise rollup
 
 `loadScorecardInputs(tx, orgId)` + `rollupResponses()`:
 - **ORG-scope KPIs**: admin's response is authoritative. Other rows ignored.
@@ -333,14 +333,14 @@ Used in:
 - `/kpis/submit` and `/progress` POST to reject 403 on out-of-scope writes
 - `/admin/team` to expose each member's effective levels
 
-**Why a helper not a column read:** if a user is promoted to ADMIN, we'd otherwise need to also bump their `allowedLevels` to all three. The helper makes the column value irrelevant for admins, so role changes are atomic — no separate column to keep in sync.
+**Why a helper not a column read:** if a user is promoted to ADMIN, we'd otherwise need to also bump their `allowedLevels` to all three. The helper makes the column value irrelevant for admins, so role changes are atomic, no separate column to keep in sync.
 
 ## Module: snapshot worker (`apps/api/src/workers/snapshot.worker.ts`)
 
 Three triggers:
-1. **SCHEDULED** — scheduler enqueues for orgs with stale snapshots
-2. **KPI_SUBMITTED** — every successful `/kpis/submit` enqueues (debounced per org)
-3. **MANUAL** — admin triggers a rebuild
+1. **SCHEDULED**: scheduler enqueues for orgs with stale snapshots
+2. **KPI_SUBMITTED**: every successful `/kpis/submit` enqueues (debounced per org)
+3. **MANUAL**: admin triggers a rebuild
 
 ```mermaid
 sequenceDiagram
@@ -360,7 +360,7 @@ sequenceDiagram
   W->>Q: complete
 ```
 
-**Idempotency** via deterministic `jobId = snapshot_${orgId}` means we don't write three snapshots when a user fast-submits three KPIs in a row. Concurrency is 3 — we can rebuild three orgs in parallel without thrashing Postgres.
+**Idempotency** via deterministic `jobId = snapshot_${orgId}` means we don't write three snapshots when a user fast-submits three KPIs in a row. Concurrency is 3, we can rebuild three orgs in parallel without thrashing Postgres.
 
 ## SDK design (`packages/sdk/src/client.ts`)
 
@@ -383,7 +383,7 @@ private async request<T>(path, opts): Promise<T> {
 }
 ```
 
-A single `refreshPromise` field deduplicates concurrent refreshes — if two requests hit 401 at the same time, the second waits on the first's refresh instead of triggering its own.
+A single `refreshPromise` field deduplicates concurrent refreshes, if two requests hit 401 at the same time, the second waits on the first's refresh instead of triggering its own.
 
 ### 2. SSE streaming (mobile-side, not SDK)
 
@@ -409,10 +409,10 @@ Implemented as a Zustand store in `apps/mobile/src/stores/auth.ts` with `status:
 
 | Concern | Mitigation |
 |---|---|
-| KPI list hit on every app launch | Redis-cached for 5 min, keyed on `(level, framework)`. Cache writes are fire-and-forget — a failed write doesn't block the read path. |
+| KPI list hit on every app launch | Redis-cached for 5 min, keyed on `(level, framework)`. Cache writes are fire-and-forget, a failed write doesn't block the read path. |
 | Many tenants → many snapshot jobs | Deterministic `jobId` deduplicates per-org. Concurrency capped at 3 workers. |
 | Chat with growing history | We send the last 40 turns at most (`take: 40` in the bootstrap). Beyond that, the older history is in DB but not in the prompt. |
 | Anthropic spend | Global daily budget (`ANTHROPIC_DAILY_BUDGET_USD`) + per-org call cap. Auto-falls-back to Haiku ($1/$5 vs $3/$15 per Mtok) when budget exhausted. |
 | Prompt cache misses | System block is the only cached part. Volatile data (user turn, timestamp) is appended after the cache_control marker. |
 | Push fan-out | Expo accepts batches of 100; we chunk + retry per Expo's `429` semantics. |
-| RLS overhead | The `SET LOCAL` to `app.current_org_id` adds ~0.2ms per transaction — negligible. Indexes carry orgId where needed. |
+| RLS overhead | The `SET LOCAL` to `app.current_org_id` adds ~0.2ms per transaction, negligible. Indexes carry orgId where needed. |

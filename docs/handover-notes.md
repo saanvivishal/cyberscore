@@ -1,6 +1,6 @@
 # Handover Notes
 
-A narrative, in plain English, of how this project was built — what decisions were made and why, what challenges came up, what was learned, and what advice would have saved time. Required reading for the next batch.
+A narrative, in plain English, of how this project was built, what decisions were made and why, what challenges came up, what was learned, and what advice would have saved time. Required reading for the next batch.
 
 > The supervisor's checklist (Section 19) asks for: key decisions, challenges, lessons, tips, things to avoid. All five are below.
 
@@ -36,7 +36,7 @@ The API is one Next.js process with logically separated modules (`lib/auth`, `li
 
 Relational, with a strongly-typed schema, and a real query language.
 
-**Why:** the data is genuinely relational — Org has many Users, User has many Responses, Response references a KPI and a ScoringTier. Foreign keys + JOIN queries are the right model. Prisma's schema-as-source-of-truth keeps the migration story sane.
+**Why:** the data is genuinely relational, Org has many Users, User has many Responses, Response references a KPI and a ScoringTier. Foreign keys + JOIN queries are the right model. Prisma's schema-as-source-of-truth keeps the migration story sane.
 
 **When to reconsider:** never, probably. The schema is well-suited; if a particular access pattern gets slow, add indexes or a Redis cache rather than switching databases.
 
@@ -44,7 +44,7 @@ Relational, with a strongly-typed schema, and a real query language.
 
 Every tenant-scoped table has RLS policies that filter rows by `app.current_org_id`. The API sets this session variable at request start (`withTenant(orgId, fn)`).
 
-**Why:** application-layer tenant checks are easy to forget. Even one missing `where: { orgId }` could leak another tenant's data. RLS makes it impossible — if you forget to set the session variable, every query returns zero rows. Defense in depth.
+**Why:** application-layer tenant checks are easy to forget. Even one missing `where: { orgId }` could leak another tenant's data. RLS makes it impossible, if you forget to set the session variable, every query returns zero rows. Defense in depth.
 
 **Caveat:** RLS adds ~5% overhead per query (Postgres has to evaluate the policy). Worth it for the safety. There's also a `withBypassRls()` escape hatch for cross-tenant operations (login lookups, OTP verifications) which sets `app.bypass_rls = 'on'` so policies honour it.
 
@@ -56,7 +56,7 @@ Access token = JWT (signed, 15-min lifetime, contains `userId` + `orgId` + `role
 
 **Why:** JWTs let route handlers verify auth without a DB hit (just signature check). Refresh tokens are revocable (delete the DB row) and rotatable (issue new on every use, delete old). Combines the best of stateless + stateful.
 
-**Caveat:** revoking a JWT mid-lifetime requires a deny-list table or shortening the lifetime. We chose 15-min lifetime + ignore mid-lifetime revocation — losing a stolen token for 15 minutes is an acceptable risk for a demo. For production, add a `revoked_at` timestamp on User and check it in `requireAuth`.
+**Caveat:** revoking a JWT mid-lifetime requires a deny-list table or shortening the lifetime. We chose 15-min lifetime + ignore mid-lifetime revocation, losing a stolen token for 15 minutes is an acceptable risk for a demo. For production, add a `revoked_at` timestamp on User and check it in `requireAuth`.
 
 ### 5. Anthropic Claude with prompt caching for the AI chat
 
@@ -64,11 +64,11 @@ Sonnet 4.5 primary, Haiku 4.5 fallback. System prompt contains the user's scorec
 
 **Why:** the scorecard is large but stable across a chat session. Caching makes follow-up turns nearly free. Sonnet for quality, Haiku as a budget-friendly fallback.
 
-**Reality:** ended up shipping with `USE_LOCAL_ADVISOR=true` (rule-based replacement) because the budget for API credits wasn't available. The Anthropic code path is intact — flip the env var to switch back. **Decision: don't take on a per-token cost that the project can't sustain.**
+**Reality:** ended up shipping with `USE_LOCAL_ADVISOR=true` (rule-based replacement) because the budget for API credits wasn't available. The Anthropic code path is intact, flip the env var to switch back. **Decision: don't take on a per-token cost that the project can't sustain.**
 
 ### 6. Local rule-based advisor as the chat default
 
-`apps/api/src/lib/advisor-local.ts` — 650 lines of templated replies grounded in the user's actual scorecard, with hand-curated sector knowledge for 8 industries.
+`apps/api/src/lib/advisor-local.ts`, 650 lines of templated replies grounded in the user's actual scorecard, with hand-curated sector knowledge for 8 industries.
 
 **Why:** zero ongoing cost. Demo-ready without API credits. Same SSE wire format as Anthropic, so the mobile app sees no difference. The supervisor's "sector RAG database" idea is satisfied without the engineering risk of full vector embeddings; their "filter junk and post-process" idea is moot because there's no LLM output to filter.
 
@@ -92,7 +92,7 @@ Server-Sent Events (one-way, HTTP-based) on the API; `react-native-sse` on mobil
 
 All on free tiers. Total monthly cost: $0.
 
-**Why:** the project doesn't have a budget. Free tiers are real now — Vercel Hobby is genuinely usable for low-traffic SaaS, Neon's Free tier gives 3 GB Postgres in Singapore, Upstash gives 10K Redis commands/day, Brevo gives 300 emails/day. Sufficient for a demo and an early-trial product.
+**Why:** the project doesn't have a budget. Free tiers are real now, Vercel Hobby is genuinely usable for low-traffic SaaS, Neon's Free tier gives 3 GB Postgres in Singapore, Upstash gives 10K Redis commands/day, Brevo gives 300 emails/day. Sufficient for a demo and an early-trial product.
 
 **When to reconsider:** when any free tier limit starts pinching. Realistic upgrade path: Vercel Pro ($20/mo, removes cold starts + bandwidth limits), Neon Launch ($19/mo, removes the 1 compute-hour/day cap), Brevo Lite ($9/mo, 20K emails/month).
 
@@ -100,7 +100,7 @@ All on free tiers. Total monthly cost: $0.
 
 A free external cron job pings `/api/v1/health` every 2 minutes to keep Vercel's serverless functions warm.
 
-**Why:** Vercel Hobby tier has cold starts that ruin the demo experience. The proper fix is Vercel Pro ($20/mo) which keeps functions always-warm. The cheap fix is an external cron — costs $0 and achieves the same effect (~99% warm).
+**Why:** Vercel Hobby tier has cold starts that ruin the demo experience. The proper fix is Vercel Pro ($20/mo) which keeps functions always-warm. The cheap fix is an external cron, costs $0 and achieves the same effect (~99% warm).
 
 **When to reconsider:** if cron-job.org goes down (rare), or if you upgrade Vercel to Pro for other reasons (longer function timeouts, more bandwidth).
 
@@ -118,7 +118,7 @@ A free external cron job pings `/api/v1/health` every 2 minutes to keep Vercel's
 
 **Why:** on Vercel there's no background worker process to drain the queue. Jobs would accumulate in Redis forever. The HTTP send is fast enough (~200ms) to do inline without breaking the API response budget.
 
-**Caveat:** if the email send fails (Brevo down, rate-limit hit), the API call returns 500 instead of "accepting the job for later retry." Acceptable for a demo. If you deploy a real worker, revert this change — see git blame on `apps/api/src/lib/queue.ts`.
+**Caveat:** if the email send fails (Brevo down, rate-limit hit), the API call returns 500 instead of "accepting the job for later retry." Acceptable for a demo. If you deploy a real worker, revert this change, see git blame on `apps/api/src/lib/queue.ts`.
 
 ---
 
@@ -126,15 +126,15 @@ A free external cron job pings `/api/v1/health` every 2 minutes to keep Vercel's
 
 The hard parts. Specifically, what consumed disproportionate time during the build.
 
-### Challenge 1: Vercel deployment — 5 different failure modes
+### Challenge 1: Vercel deployment, 5 different failure modes
 
 What I expected to be a 30-minute deploy turned into 4 hours of fighting Vercel through five distinct failure modes:
 
-1. **Next.js + React 19 prerender bug** — Vercel was failing to build `/404` due to a known issue in `next@15.1.3`. Fixed by adding explicit `app/not-found.tsx` and `pages/_error.tsx`.
-2. **Commit author email mismatch** — Vercel blocked the deployment because my git commits were authored as a default email that didn't match the Vercel account. Fixed with `git filter-branch` to rewrite history with the correct email, then force-push.
-3. **TypeScript checking the scripts directory** — Vercel ran `tsc` over `scripts/` which had loose imports. Fixed by adding `"scripts"` to `tsconfig.json` exclude.
-4. **Type errors only on Vercel** — Vercel's clean npm install resolved some modules differently than my local Mac. Fixed by adding `typescript: { ignoreBuildErrors: true }` + `eslint: { ignoreDuringBuilds: true }` in `next.config.ts` (we still run `tsc --noEmit` via Turbo, so we're not actually skipping checks).
-5. **CVE-2025-66478** — Vercel security blocked deploys using `next@15.1.3` because of an unrelated CVE. Fixed by upgrading to `next@15.5.18`.
+1. **Next.js + React 19 prerender bug**. Vercel was failing to build `/404` due to a known issue in `next@15.1.3`. Fixed by adding explicit `app/not-found.tsx` and `pages/_error.tsx`.
+2. **Commit author email mismatch**. Vercel blocked the deployment because my git commits were authored as a default email that didn't match the Vercel account. Fixed with `git filter-branch` to rewrite history with the correct email, then force-push.
+3. **TypeScript checking the scripts directory**. Vercel ran `tsc` over `scripts/` which had loose imports. Fixed by adding `"scripts"` to `tsconfig.json` exclude.
+4. **Type errors only on Vercel**. Vercel's clean npm install resolved some modules differently than my local Mac. Fixed by adding `typescript: { ignoreBuildErrors: true }` + `eslint: { ignoreDuringBuilds: true }` in `next.config.ts` (we still run `tsc --noEmit` via Turbo, so we're not actually skipping checks).
+5. **CVE-2025-66478**. Vercel security blocked deploys using `next@15.1.3` because of an unrelated CVE. Fixed by upgrading to `next@15.5.18`.
 
 **Lesson:** deploy to your target on day 2, not day 25. Cold-debugging a stack you've never deployed against is hell.
 
@@ -143,12 +143,12 @@ What I expected to be a 30-minute deploy turned into 4 hours of fighting Vercel 
 I tried to install Android Studio so I could build the APK locally. macOS Gatekeeper refused to open the app: *"Android Studio is damaged and can't be opened. You should move it to the Bin."*
 
 Tried:
-- `xattr -cr /Applications/Android\ Studio.app` (failed — permission denied on system-protected attributes)
+- `xattr -cr /Applications/Android\ Studio.app` (failed, permission denied on system-protected attributes)
 - `sudo xattr -dr com.apple.quarantine /Applications/Android\ Studio.app` (executed but app still refused to open)
 - System Settings → Privacy & Security → "Open Anyway" (button didn't appear because the trigger window had expired)
 - Re-download Android Studio (same problem)
 
-Burnt 1.5 hours. Then realised: **we don't need Android Studio at all.** Expo's EAS Build does the entire Android build in the cloud — no local Android toolchain needed. Pivoted, deleted Android Studio, used EAS, had a working APK 20 minutes later.
+Burnt 1.5 hours. Then realised: **we don't need Android Studio at all.** Expo's EAS Build does the entire Android build in the cloud, no local Android toolchain needed. Pivoted, deleted Android Studio, used EAS, had a working APK 20 minutes later.
 
 **Lesson:** before going deep on a fix, ask "do I even need this?" The macOS Gatekeeper issue was 100% solvable, but I didn't need it solved. Knowing what to *not* do is half the battle.
 
@@ -169,8 +169,8 @@ After the API was deployed and the APK was installed, every screen transition fe
 Root cause: Vercel Hobby tier shuts down idle serverless functions after ~5 minutes. The first request after idle pays a 5-10 second cold-start tax. Combined with React Query's default 2-retries-with-backoff, the user experience was unusable.
 
 Considered:
-- **Vercel Pro** ($20/mo) — eliminates cold starts. Rejected: no budget.
-- **Cron job to ping every X minutes** — keeps functions warm. Free. Picked this.
+- **Vercel Pro** ($20/mo), eliminates cold starts. Rejected: no budget.
+- **Cron job to ping every X minutes**: keeps functions warm. Free. Picked this.
 
 Set up cron-job.org with a single job hitting `/api/v1/health` every 2 minutes. Cold-start tax dropped from 5-10s to ~200ms.
 
@@ -182,7 +182,7 @@ Also patched the KPI question screen to parallelise its two sequential writes (`
 
 After the email path was finally working in curl tests, the actual API call to `/api/v1/auth/password-reset/request` was returning 500. Investigation: `enqueueOtpEmail` was adding a job to Redis... and there was no worker anywhere to drain it.
 
-The original architecture (from earlier sprints) had a separate worker process (`npm run worker`) draining the queue. On Vercel we don't deploy that worker — only the route handlers run.
+The original architecture (from earlier sprints) had a separate worker process (`npm run worker`) draining the queue. On Vercel we don't deploy that worker, only the route handlers run.
 
 Fixed `enqueueOtpEmail` and `enqueueInviteEmail` to call `sendEmail()` directly (HTTP-based via Brevo, fast enough to inline). Other queue types (snapshot, push, abandonment) still use BullMQ but are dormant on Vercel.
 
@@ -208,15 +208,15 @@ I wasted ~3 hours total on services whose free tiers didn't fit the use case (Re
 
 ### Lesson 3: Pick HTTP APIs over SMTP for serverless email
 
-Vercel and other serverless platforms are unreliable for raw outbound TCP. Every modern email service has both SMTP and HTTP APIs — always pick HTTP on serverless. Faster, more reliable, simpler error handling.
+Vercel and other serverless platforms are unreliable for raw outbound TCP. Every modern email service has both SMTP and HTTP APIs, always pick HTTP on serverless. Faster, more reliable, simpler error handling.
 
 ### Lesson 4: Test your perceived-latency story, not just your p95 numbers
 
-The cold-start problem didn't show up in any of my latency measurements — every API call I made via curl returned in 200ms. The lag only appeared from the phone, with React Query's retries compounding on top of cold starts.
+The cold-start problem didn't show up in any of my latency measurements, every API call I made via curl returned in 200ms. The lag only appeared from the phone, with React Query's retries compounding on top of cold starts.
 
 **Fix for next batch:** test from a real phone on real network. Measure the time from button-tap to screen-update, not just API response time.
 
-### Lesson 5: When you fail with Plan A, don't keep debugging Plan A — switch to Plan B
+### Lesson 5: When you fail with Plan A, don't keep debugging Plan A, switch to Plan B
 
 The Android Studio drama is the canonical example. Should have abandoned macOS Gatekeeper debugging after 20 minutes and switched to cloud builds. Took me 1.5 hours to realise.
 
@@ -228,13 +228,13 @@ The Android Studio drama is the canonical example. Should have abandoned macOS G
 
 ### Lesson 7: Strict TypeScript is a long-term investment that pays back fast
 
-Turning on `noUnusedLocals`, `noUncheckedIndexedAccess`, etc. from day 1 was annoying for the first week. After that it's free safety — every refactor catches dozens of "I forgot to update this call site" bugs at compile time. Never starting a new project without strict mode again.
+Turning on `noUnusedLocals`, `noUncheckedIndexedAccess`, etc. from day 1 was annoying for the first week. After that it's free safety, every refactor catches dozens of "I forgot to update this call site" bugs at compile time. Never starting a new project without strict mode again.
 
 ### Lesson 8: Dev-mode escape hatches are gold
 
 Returning OTPs inline in API responses when `NODE_ENV=development` (visible in the response, shown in an amber banner on the verify screen) meant local development didn't depend on a working SMTP server. Made onboarding screens testable without setting up Mailtrap or similar.
 
-**Generalised lesson:** every external dependency should have a dev-mode bypass. SMTP, push notifications, R2 uploads, Anthropic API — all benefit from "if env says dev, return a fake response" paths.
+**Generalised lesson:** every external dependency should have a dev-mode bypass. SMTP, push notifications, R2 uploads, Anthropic API, all benefit from "if env says dev, return a fake response" paths.
 
 ---
 
@@ -247,30 +247,30 @@ Practical advice for picking up the codebase. Read these *before* you write code
 1. **Read the entire `docs/` folder + HANDOVER_CHECKLIST.md.** It's a few hours of reading and it saves a few weeks of confusion. Promise.
 2. **Run `./scripts/setup.sh` and verify the local app works.** If it doesn't, fix that before changing anything else.
 3. **Read [docs/known-issues.md](known-issues.md)** so you don't trip over the same gotchas (Metro cache, env var Zod validation, Next.js HMR stale routes).
-4. **Read the demo video walkthrough in [HANDOVER_CHECKLIST.md §13](../HANDOVER_CHECKLIST.md#13-demo--presentation)** — knowing what the product does end-to-end shapes how you think about changes.
+4. **Read the demo video walkthrough in [HANDOVER_CHECKLIST.md §13](../HANDOVER_CHECKLIST.md#13-demo--presentation)**: knowing what the product does end-to-end shapes how you think about changes.
 5. **Apply for accounts on all the services in [docs/access-credentials.md](access-credentials.md)** with your own emails, so you can switch ownership cleanly.
 
 ### What to build first
 
 In rough priority order:
 
-1. **Tests for `lib/scoring.ts`, `lib/scorecard.ts`, `lib/access.ts`.** Pure functions, easy to test, security-critical. Target 60% coverage on each. Vitest is already wired — just create `*.test.ts` files next to the source.
-2. **GitHub Actions CI.** Lint + typecheck + test on every PR. Template in [docs/deployment.md — CI/CD](deployment.md). Should take ~half a day.
+1. **Tests for `lib/scoring.ts`, `lib/scorecard.ts`, `lib/access.ts`.** Pure functions, easy to test, security-critical. Target 60% coverage on each. Vitest is already wired, just create `*.test.ts` files next to the source.
+2. **GitHub Actions CI.** Lint + typecheck + test on every PR. Template in [docs/deployment.md, CI/CD](deployment.md). Should take ~half a day.
 3. **Sentry.** Sign up for free, paste DSN into `SENTRY_DSN` env var on Vercel, redeploy. Now you'll see errors with stack traces.
 4. **Logging dashboard.** Better Stack / Logtail free tier. Tail Vercel function logs into a queryable UI.
 
 ### Code conventions
 
-The codebase has strong conventions — follow them:
+The codebase has strong conventions, follow them:
 
 - **Strict TypeScript everywhere.** Don't disable strict flags.
-- **Conventional Commits** for every commit (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `perf:`, `test:`). See [CONTRIBUTING.md — Commits](../CONTRIBUTING.md).
+- **Conventional Commits** for every commit (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `perf:`, `test:`). See [CONTRIBUTING.md, Commits](../CONTRIBUTING.md).
 - **Zod schemas in `packages/types`** for every request/response shape. Both API and mobile import from there.
-- **Pino structured logging.** No `console.log` in production code — use `logger.info({...}, 'message')`.
-- **RFC 7807 Problem Details** for every error response. There's a `problem()` helper in `lib/problem.ts` — use it.
+- **Pino structured logging.** No `console.log` in production code, use `logger.info({...}, 'message')`.
+- **RFC 7807 Problem Details** for every error response. There's a `problem()` helper in `lib/problem.ts`, use it.
 - **Inline doc comments** above non-obvious functions. Header doc blocks on route handlers explaining purpose + auth posture.
 
-### Architecture invariants — please don't break these
+### Architecture invariants, please don't break these
 
 - **API has no business logic in route handlers.** Logic lives in `lib/`. Route handlers parse + validate + call lib functions + format response.
 - **Mobile screens have no API logic.** API calls go through `@cyberscore/sdk` (typed) + React Query.
@@ -281,7 +281,7 @@ The codebase has strong conventions — follow them:
 
 - **First:** re-read this file and `known-issues.md`. The problem may already be documented.
 - **Then:** check git blame on the relevant file. Most non-obvious code has a comment explaining why it's the way it is.
-- **Last:** open an issue. Don't silently refactor — document what you found.
+- **Last:** open an issue. Don't silently refactor, document what you found.
 
 ---
 
@@ -291,7 +291,7 @@ The "don't go down this rabbit hole" list. Specific traps the next batch will be
 
 ### Don't try to run Android Studio for this project
 
-The mobile app is React Native + Expo. Android Studio is for native Android development. You do **not** need it. EAS Build does Android builds in the cloud. If you find yourself fighting Gatekeeper / installing SDKs / configuring AVDs, stop — you're solving the wrong problem.
+The mobile app is React Native + Expo. Android Studio is for native Android development. You do **not** need it. EAS Build does Android builds in the cloud. If you find yourself fighting Gatekeeper / installing SDKs / configuring AVDs, stop, you're solving the wrong problem.
 
 ### Don't use SMTP from Vercel
 
@@ -319,7 +319,7 @@ Vercel auto-deploys `main`. A broken `main` = broken production. Run `npm run ty
 
 ### Don't disable RLS for performance reasons
 
-The 5% RLS overhead is the cheapest defense in depth you'll ever have. If a query is slow because of RLS, add an index — don't disable RLS.
+The 5% RLS overhead is the cheapest defense in depth you'll ever have. If a query is slow because of RLS, add an index, don't disable RLS.
 
 ### Don't use `--no-verify` to skip git hooks
 
@@ -327,16 +327,16 @@ If the pre-commit hook is failing, the hook is telling you something is broken. 
 
 ### Don't trust the supervisor's checklist as gospel
 
-Mohan Ram C's checklist is good (this whole document set is structured around it), but it was written generically. Adapt where it doesn't fit your project's specifics. The checklist's `docker-compose.yml` is optional — we skipped it because we don't deploy via Docker. Read the spirit of each item, not the letter.
+Mohan Ram C's checklist is good (this whole document set is structured around it), but it was written generically. Adapt where it doesn't fit your project's specifics. The checklist's `docker-compose.yml` is optional, we skipped it because we don't deploy via Docker. Read the spirit of each item, not the letter.
 
 ---
 
 ## Final word
 
-This was a fun project. Five weeks went fast. The product is genuinely useful — I'd use a self-assessment scorecard for my own future companies. The codebase is clean enough that a new developer can read it without three weeks of onboarding.
+This was a fun project. Five weeks went fast. The product is genuinely useful, I'd use a self-assessment scorecard for my own future companies. The codebase is clean enough that a new developer can read it without three weeks of onboarding.
 
 What's not done: tests, CI, paid tiers, custom domain, scorecard PDF export, push notifications wired end-to-end. The roadmap lays out what to build next.
 
-Good luck. Don't be afraid to delete code I wrote — there's plenty that could be cleaner.
+Good luck. Don't be afraid to delete code I wrote, there's plenty that could be cleaner.
 
-— Saanvi Vishal, 2026-05-18
+ Saanvi Vishal, 2026-05-18

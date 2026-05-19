@@ -2,26 +2,26 @@
 
 A frank inventory of what doesn't work, what's incomplete, and what the next person should expect to run into.
 
-> **What changed in v0.3.0** (relative to v0.2.0): the project is now **fully deployed** — API on Vercel, Postgres on Neon, Redis on Upstash, email on Brevo. The Android APK is built via EAS and installs standalone on real phones. Several deployment-only bugs were hit and fixed: the BullMQ email queue was bypassed in favour of inline sending (because no worker runs on Vercel), Brevo's HTTP API replaced raw SMTP (Vercel throttles outbound TCP on 465/587), an external `cron-job.org` job pings `/api/v1/health` every 2 minutes to defeat cold starts, the onboarding carousel `index.tsx` redirect was fixed (it was hardcoded to skip onboarding and go straight to login), and the KPI question screen now parallelises its writes for a 2-3× speedup on Next-tap.
+> **What changed in v0.3.0** (relative to v0.2.0): the project is now **fully deployed**. API on Vercel, Postgres on Neon, Redis on Upstash, email on Brevo. The Android APK is built via EAS and installs standalone on real phones. Several deployment-only bugs were hit and fixed: the BullMQ email queue was bypassed in favour of inline sending (because no worker runs on Vercel), Brevo's HTTP API replaced raw SMTP (Vercel throttles outbound TCP on 465/587), an external `cron-job.org` job pings `/api/v1/health` every 2 minutes to defeat cold starts, the onboarding carousel `index.tsx` redirect was fixed (it was hardcoded to skip onboarding and go straight to login), and the KPI question screen now parallelises its writes for a 2-3× speedup on Next-tap.
 >
-> **What changed in v0.2.0** (relative to v0.1.0): the four `ApiError.title` TypeScript errors are fixed (added a `title` getter on `ApiError`). The `Response.matchedTier` typo is fixed (relation now defined in the schema; FK migration applied). RLS policies are now present in `migrations/20260516123100_rls_policies/` and applied. The chat endpoint has a 20-msg/minute per-user rate limit. And the AI chat now defaults to a **local rule-based advisor** that uses your scorecard + a sector knowledge primer — no Anthropic API budget required.
+> **What changed in v0.2.0** (relative to v0.1.0): the four `ApiError.title` TypeScript errors are fixed (added a `title` getter on `ApiError`). The `Response.matchedTier` typo is fixed (relation now defined in the schema; FK migration applied). RLS policies are now present in `migrations/20260516123100_rls_policies/` and applied. The chat endpoint has a 20-msg/minute per-user rate limit. And the AI chat now defaults to a **local rule-based advisor** that uses your scorecard + a sector knowledge primer, no Anthropic API budget required.
 
 ## A. Bugs you'll trip over
 
-### A1. Pre-existing TypeScript errors — ✅ FIXED in v0.2.0
+### A1. Pre-existing TypeScript errors, Done FIXED in v0.2.0
 
 All 5 errors flagged in v0.1.0 are resolved:
 
 - The 4 `ApiError.title` references in mobile screens now work because `ApiError` exposes a `title` getter (returns `problem.title`).
-- The `admin/scorecard/route.ts` `matchedTier` typo is gone — `Response.matchedTier` is now a proper Prisma relation (migration `20260516123040_add_response_matched_tier_relation`).
+- The `admin/scorecard/route.ts` `matchedTier` typo is gone, `Response.matchedTier` is now a proper Prisma relation (migration `20260516123040_add_response_matched_tier_relation`).
 
 `npm run typecheck` from the repo root passes clean.
 
-### A2. Anthropic billing dependency — ✅ MITIGATED in v0.2.0
+### A2. Anthropic billing dependency, Done MITIGATED in v0.2.0
 
 The chat endpoint now defaults to a local rule-based advisor that requires no external API. See [§E. Local Advisor](#e-local-advisor) below.
 
-The `/ai/compare` endpoint still calls Anthropic directly and will still fail with a 400 if your API account has $0 credit. That endpoint isn't wired to a primary user flow — fix later if needed.
+The `/ai/compare` endpoint still calls Anthropic directly and will still fail with a 400 if your API account has $0 credit. That endpoint isn't wired to a primary user flow, fix later if needed.
 
 ### A3. The "Objects are not valid as a React child" 500
 
@@ -30,7 +30,7 @@ If you ever see this in API responses:
 Objects are not valid as a React child (found: object with keys {$$typeof, type, key, props, _owner, _store}).
 ```
 
-It means a route handler module threw at import time (e.g. invalid env var) and Next.js is trying to render the Pages-router error page, which itself has a bug. The actual error is in the server logs above this message — usually a Zod env validation failure. Fix the env, restart the dev server.
+It means a route handler module threw at import time (e.g. invalid env var) and Next.js is trying to render the Pages-router error page, which itself has a bug. The actual error is in the server logs above this message, usually a Zod env validation failure. Fix the env, restart the dev server.
 
 ### A4. Stale Next.js dev cache after adding new files
 
@@ -48,17 +48,17 @@ npx expo start --clear
 
 Without this, you get `Unable to resolve module` errors even though the package is installed.
 
-### A6. Email worker fails when SMTP isn't configured — ✅ ARCHITECTURE CHANGED in v0.3.0
+### A6. Email worker fails when SMTP isn't configured, Done ARCHITECTURE CHANGED in v0.3.0
 
-In v0.1.0 / v0.2.0 the email worker process was where OTP and invite emails actually got sent. On Vercel we don't run that worker (no background process — only request-bound serverless functions), so emails sat in Redis forever with nothing to drain them. Symptom: API returns 200 with `otpSent: true` but no email ever arrives.
+In v0.1.0 / v0.2.0 the email worker process was where OTP and invite emails actually got sent. On Vercel we don't run that worker (no background process, only request-bound serverless functions), so emails sat in Redis forever with nothing to drain them. Symptom: API returns 200 with `otpSent: true` but no email ever arrives.
 
-Fix in v0.3.0: `apps/api/src/lib/queue.ts` was patched so `enqueueOtpEmail()` and `enqueueInviteEmail()` send emails **inline** via the HTTP API (Brevo by default; auto-detected from `SMTP_PASS` prefix). The function names stay `enqueue*` for source compatibility, but they no longer go through Redis. Other queue types (snapshot, PDF, push, abandonment) still use BullMQ — those queue types are dormant on Vercel and only matter if a separate worker is deployed.
+Fix in v0.3.0: `apps/api/src/lib/queue.ts` was patched so `enqueueOtpEmail()` and `enqueueInviteEmail()` send emails **inline** via the HTTP API (Brevo by default; auto-detected from `SMTP_PASS` prefix). The function names stay `enqueue*` for source compatibility, but they no longer go through Redis. Other queue types (snapshot, PDF, push, abandonment) still use BullMQ, those queue types are dormant on Vercel and only matter if a separate worker is deployed.
 
-If you're deploying on a stack with a real worker process (Render, Fly.io, your own VM), you may want to revert this — see git blame on `queue.ts` for the diff.
+If you're deploying on a stack with a real worker process (Render, Fly.io, your own VM), you may want to revert this, see git blame on `queue.ts` for the diff.
 
-### A8. Vercel cold starts make every screen feel laggy — ✅ MITIGATED in v0.3.0
+### A8. Vercel cold starts make every screen feel laggy, Done MITIGATED in v0.3.0
 
-On Vercel Hobby tier, each Next.js route handler is its own serverless function. Functions go idle after ~5 minutes of no traffic. The first request after idle pays a 5-10 second cold-start tax to spin up a fresh container. Mobile apps make many small API calls per screen, so that lag compounds — every screen transition felt like it was hanging.
+On Vercel Hobby tier, each Next.js route handler is its own serverless function. Functions go idle after ~5 minutes of no traffic. The first request after idle pays a 5-10 second cold-start tax to spin up a fresh container. Mobile apps make many small API calls per screen, so that lag compounds, every screen transition felt like it was hanging.
 
 Fix in v0.3.0: external cron at https://console.cron-job.org pings `/api/v1/health` every 2 minutes. Vercel's Fluid Compute keeps adjacent functions warm via the shared health-endpoint warmup. End result: cold-start tax drops from 5-10s to ~200ms.
 
@@ -66,7 +66,7 @@ Additionally, the KPI question screen was patched to parallelise its two writes 
 
 For production-scale: upgrade Vercel to Pro tier (cold starts are eliminated by their always-warm infrastructure) or migrate to a non-serverless host like Render / Fly.io / Railway where the process stays alive.
 
-### A9. Vercel doesn't accept raw outbound SMTP reliably — ✅ FIXED in v0.3.0
+### A9. Vercel doesn't accept raw outbound SMTP reliably, Done FIXED in v0.3.0
 
 Vercel serverless functions can technically open outbound TCP to port 465 / 587, but they sometimes hang silently and consume the full request budget before timing out. Nodemailer's `transport.sendMail()` is particularly vulnerable since it doesn't expose a tunable connection timeout.
 
@@ -78,9 +78,9 @@ Fix in v0.3.0: `apps/api/src/lib/email.ts` auto-detects the email provider from 
 
 This is faster (no TCP handshake), more reliable (plain HTTPS that Vercel handles natively), and uses the same credentials.
 
-### A10. Onboarding carousel was bypassed on cold start — ✅ FIXED in v0.3.0
+### A10. Onboarding carousel was bypassed on cold start, Done FIXED in v0.3.0
 
-`app/index.tsx` was hardcoded to `<Redirect href="/(auth)/login" />` which short-circuited the 3-slide onboarding carousel that existed at `app/(auth)/onboarding.tsx`. The carousel was finished, styled, and routed correctly — but unreachable.
+`app/index.tsx` was hardcoded to `<Redirect href="/(auth)/login" />` which short-circuited the 3-slide onboarding carousel that existed at `app/(auth)/onboarding.tsx`. The carousel was finished, styled, and routed correctly, but unreachable.
 
 Fix in v0.3.0: `index.tsx` now redirects to `/(auth)/onboarding`, and the carousel tail-calls into login on Skip / last Next. AuthGate in `_layout.tsx` already routes authenticated users to the dashboard before paint, so this only affects unauthenticated cold starts (the people who should see the onboarding).
 
@@ -90,7 +90,7 @@ Older versions of `apps/mobile/package.json` had `"start": "expo start --dev-cli
 
 ## B. Incomplete features
 
-### B1. RLS policies — ✅ FIXED in v0.2.0
+### B1. RLS policies, Done FIXED in v0.2.0
 
 Policies for every tenant-scoped table are now defined in `apps/api/prisma/migrations/20260516123100_rls_policies/migration.sql`. The migration:
 
@@ -99,7 +99,7 @@ Policies for every tenant-scoped table are now defined in `apps/api/prisma/migra
 - Honours the `app.bypass_rls = 'on'` flag that `withBypassRls()` sets, so worker / registration / login flows still work
 - `audit_logs` allows `orgId IS NULL` inserts (for system events before org context exists)
 - `otp_verifications` is bypass-only (keyed on email, not orgId)
-- KPI catalogue tables (`kpis`, `scoring_tiers`, `kpi_versions`, `kpi_suggestions`, `industry_benchmarks`) are **deliberately NOT** under RLS — they're shared across all tenants
+- KPI catalogue tables (`kpis`, `scoring_tiers`, `kpi_versions`, `kpi_suggestions`, `industry_benchmarks`) are **deliberately NOT** under RLS, they're shared across all tenants
 
 Verified: login + /me + /scorecard + /admin/team all work under RLS in v0.2.0.
 
@@ -107,11 +107,11 @@ Verified: login + /me + /scorecard + /admin/team all work under RLS in v0.2.0.
 
 There are no `*.test.ts` or `*.spec.ts` files anywhere in the repo. `npm run test` is wired (vitest + turbo) but the test directories are empty. Priority test targets if you're adding them:
 
-- `lib/scoring.ts` — pure functions, easy wins, high value
-- `lib/scorecard.ts` — pure aggregation logic; mock the Prisma client
-- `lib/access.ts` — small but security-critical (`effectiveAllowedLevels`)
-- `lib/auth.ts` — token issuance + revocation
-- Route handlers — integration tests with a real Postgres test DB
+- `lib/scoring.ts`. Pure functions, easy wins, high value
+- `lib/scorecard.ts`. Pure aggregation logic; mock the Prisma client
+- `lib/access.ts`. Small but security-critical (`effectiveAllowedLevels`)
+- `lib/auth.ts`. Token issuance + revocation
+- Route handlers, integration tests with a real Postgres test DB
 
 ### B3. Evidence uploads need real R2/S3 credentials
 
@@ -119,7 +119,7 @@ The `R2_*` env vars in `.env.example` are placeholders. Locally, evidence presig
 
 ### B4. Push notifications need an Expo Access Token in prod
 
-The `expo-server-sdk` works without `EXPO_ACCESS_TOKEN` for sending — Expo's push service trusts the tokens themselves. But for receipt checking + abuse protection, set the token in production. Get one at https://expo.dev/accounts/[account]/settings/access-tokens.
+The `expo-server-sdk` works without `EXPO_ACCESS_TOKEN` for sending, Expo's push service trusts the tokens themselves. But for receipt checking + abuse protection, set the token in production. Get one at https://expo.dev/accounts/[account]/settings/access-tokens.
 
 ### B5. TOTP requires `TOTP_ENCRYPTION_KEY`
 
@@ -127,29 +127,29 @@ The TOTP setup/verify endpoints validate the env var and refuse to run without i
 
 ### B6. Mobile auth context type mismatch (`_layout.tsx:33`)
 
-Pre-existing — `me.email` is read on a context type that doesn't declare it. Doesn't break runtime because Zustand types are loose. Mentioned in the carried-over project memory; don't fix without checking what depends on it.
+Pre-existing, `me.email` is read on a context type that doesn't declare it. Doesn't break runtime because Zustand types are loose. Mentioned in the carried-over project memory; don't fix without checking what depends on it.
 
 ## C. Architectural gaps
 
-### C1. Chat streaming rate limit — ✅ FIXED in v0.2.0
+### C1. Chat streaming rate limit, Done FIXED in v0.2.0
 
 The POST `/ai/chat/threads/[id]/messages` endpoint now applies a per-user limit of 20 messages per minute via the existing Redis sliding-window helper. Exceeds return 429 with a `Retry-After` header.
 
 ### C2. Snapshot worker doesn't write per-user snapshots
 
-ENTERPRISE non-admins see a personal scorecard (their own responses, only their allowed levels) computed live on every `/scorecard` call. There's no per-user snapshot history — analytics trends are org-level only. Fine for the current scope; revisit if you want per-employee trend lines.
+ENTERPRISE non-admins see a personal scorecard (their own responses, only their allowed levels) computed live on every `/scorecard` call. There's no per-user snapshot history, analytics trends are org-level only. Fine for the current scope; revisit if you want per-employee trend lines.
 
 ### C3. The KPI cache doesn't honour per-user filtering
 
-`/api/v1/kpis` caches the global list in Redis and filters per-request after read. Correct but wasteful — every request still pays the filter cost. For high-traffic orgs, cache per `(level, framework, levelsKey)` where `levelsKey` is a stable serialization of the user's allowed levels.
+`/api/v1/kpis` caches the global list in Redis and filters per-request after read. Correct but wasteful, every request still pays the filter cost. For high-traffic orgs, cache per `(level, framework, levelsKey)` where `levelsKey` is a stable serialization of the user's allowed levels.
 
 ### C4. No transaction around enqueueSnapshot + response upsert
 
 The KPI submit endpoint writes the response inside `withTenant`, then enqueues the snapshot job *outside* the transaction. If the transaction commits but the Redis enqueue fails, the response is saved but the snapshot is stale. Mitigated by the scheduled snapshot sweep which will catch up within an hour.
 
-### C5. `kpi:NA` audit action — was a doc bug, not a code bug
+### C5. `kpi:NA` audit action, was a doc bug, not a code bug
 
-The v0.1.0 known-issues claim that `/kpis/na` didn't write to the audit log was wrong — the route does call `audit({ action: AuditActions.KPI_NA_MARKED, ... })` after the upsert (lines 63–70 of `apps/api/src/app/api/v1/kpis/na/route.ts`). Nothing to fix.
+The v0.1.0 known-issues claim that `/kpis/na` didn't write to the audit log was wrong, the route does call `audit({ action: AuditActions.KPI_NA_MARKED, ... })` after the upsert (lines 63 to 70 of `apps/api/src/app/api/v1/kpis/na/route.ts`). Nothing to fix.
 
 ## D. Operational concerns
 
@@ -159,7 +159,7 @@ You have to set this up on whichever Postgres host you deploy to. Supabase Pro /
 
 ### D2. No staging environment
 
-Currently there's one DB per developer's laptop and (presumably) one for production. A staging environment with anonymised prod data is the missing middle. Easy to add — a separate Supabase project + a Vercel preview deployment pointed at it.
+Currently there's one DB per developer's laptop and (presumably) one for production. A staging environment with anonymised prod data is the missing middle. Easy to add, a separate Supabase project + a Vercel preview deployment pointed at it.
 
 ### D3. No log-based alerting
 
@@ -211,27 +211,27 @@ You now have an admin + an employee in the same org. Use the mobile app to log i
 
 ### What it is
 
-The chat endpoint defaults to a **rule-based, deterministic advisor** that runs entirely inside the API process — no Anthropic call, no external network, no API key, no cost. It's structured to look and feel like the real AI chat:
+The chat endpoint defaults to a **rule-based, deterministic advisor** that runs entirely inside the API process, no Anthropic call, no external network, no API key, no cost. It's structured to look and feel like the real AI chat:
 
 - Same SSE wire format (`user_message` → `delta` × N → `done`)
 - Word-by-word streaming with a 40ms delay so the UI cursor effect still works
 - Same persistence (`chat_threads` + `chat_messages`)
-- Same UI — the mobile app sees no difference
+- Same UI, the mobile app sees no difference
 
 Inside, it does three things:
 
-1. **Intent detection** — keyword/regex matches the user's question against a fixed set of intents: `weakest`, `first_priority`, `improve_level`, `explain_level`, `overall_summary`, `sector_threats`, `sector_controls`, `sector_regulations`, `completeness`, `greeting`, `unknown`.
-2. **Sector knowledge primer** — `apps/api/src/lib/advisor-local.ts` carries a hand-curated knowledge base for each of the 8 industries: top threats, key controls, applicable regulations, one-liner summary. The reply for a "Banking" user mentions PCI DSS + RBI; for "Healthcare" it mentions HIPAA + ransomware; etc.
-3. **Real data binding** — every reply weaves in the user's actual scorecard: overall score, level breakdowns, underperforming KPIs by name + score.
+1. **Intent detection**: keyword/regex matches the user's question against a fixed set of intents: `weakest`, `first_priority`, `improve_level`, `explain_level`, `overall_summary`, `sector_threats`, `sector_controls`, `sector_regulations`, `completeness`, `greeting`, `unknown`.
+2. **Sector knowledge primer**: `apps/api/src/lib/advisor-local.ts` carries a hand-curated knowledge base for each of the 8 industries: top threats, key controls, applicable regulations, one-liner summary. The reply for a "Banking" user mentions PCI DSS + RBI; for "Healthcare" it mentions HIPAA + ransomware; etc.
+3. **Real data binding**: every reply weaves in the user's actual scorecard: overall score, level breakdowns, underperforming KPIs by name + score.
 
-This is the **default**. The Anthropic code path is still in place, gated by `USE_LOCAL_ADVISOR`. Flip the env var to `false` when budget becomes available — no other changes needed.
+This is the **default**. The Anthropic code path is still in place, gated by `USE_LOCAL_ADVISOR`. Flip the env var to `false` when budget becomes available, no other changes needed.
 
 ### Why this design
 
 - **Mohan's "sector database" idea is satisfied** without the engineering risk of full RAG + embeddings
-- **Mohan's "filter junk and post-process" idea is moot** — there's no LLM output to filter
-- **Zero ongoing cost** — the assessor reviewing this can install Expo Go and try the chat without us needing API credits
-- **Honestly framed** — the assistant is presented as a deterministic advisor, not "AI." The Anthropic SDK integration in the codebase shows we *can* call real LLMs; the env flag is the only thing standing in the way
+- **Mohan's "filter junk and post-process" idea is moot**: there's no LLM output to filter
+- **Zero ongoing cost**: the assessor reviewing this can install Expo Go and try the chat without us needing API credits
+- **Honestly framed**: the assistant is presented as a deterministic advisor, not "AI." The Anthropic SDK integration in the codebase shows we *can* call real LLMs; the env flag is the only thing standing in the way
 
 ### Known limits
 
@@ -270,6 +270,6 @@ For the supervisor's review, after running `npm run db:seed`:
 | | |
 |---|---|
 | Email | `saanvi.vishal@iiitb.ac.in` |
-| Password | reset via the in-app **Forgot?** flow — dev mode shows the OTP inline on the next screen |
+| Password | reset via the in-app **Forgot?** flow, dev mode shows the OTP inline on the next screen |
 
-This account is a SOLO admin in the Technology industry, with the EXCEL framework selected. Some KPIs may already be answered from prior testing — feel free to add more.
+This account is a SOLO admin in the Technology industry, with the EXCEL framework selected. Some KPIs may already be answered from prior testing, feel free to add more.

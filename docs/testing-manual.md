@@ -22,16 +22,16 @@ You'll need:
 
 1. **Local dev environment** running:
    ```bash
-   # Terminal 1 — API
+ # Terminal 1, API
    npm run dev --workspace @cyberscore/api
    
-   # Terminal 2 — Mobile (Metro)
+ # Terminal 2, Mobile (Metro)
    EXPO_PUBLIC_API_URL=http://$(ipconfig getifaddr en0):3000 \
      npm run start --workspace @cyberscore/mobile
    ```
-   *(Skip the worker terminal — emails are inline now.)*
+   *(Skip the worker terminal, emails are inline now.)*
 
-2. **Or the live production deployment** at https://cyberscore-api.vercel.app — when testing the deployed APK or doing pre-handover smoke tests.
+2. **Or the live production deployment** at https://cyberscore-api.vercel.app, when testing the deployed APK or doing pre-handover smoke tests.
 
 3. **A clean database** (if testing the register flow). Recreate with:
    ```bash
@@ -40,7 +40,7 @@ You'll need:
 
 ---
 
-## Smoke test (5 minutes — run before every demo)
+## Smoke test (5 minutes, run before every demo)
 
 The minimum verification that the app is functional.
 
@@ -49,14 +49,14 @@ The minimum verification that the app is functional.
 | 1 | Open the mobile app | Onboarding carousel appears, 3 slides | ⬜ |
 | 2 | Tap **Skip** | Lands on Login screen | ⬜ |
 | 3 | Enter `saanvi.vishal@iiitb.ac.in` / `cyberscore-demo-2026`, tap Login | Dashboard appears within 2 sec |⬜ |
-| 4 | Dashboard shows score ring, level tiles | Numeric scores visible (not "—"), tiles show RED/AMBER/GREEN | ⬜ |
+| 4 | Dashboard shows score ring, level tiles | Numeric scores visible (not ""), tiles show RED/AMBER/GREEN | ⬜ |
 | 5 | Tap **Assessment** | Level picker shows PEOPLE / PROCESS / COMPANY | ⬜ |
 | 6 | Pick PEOPLE | First KPI question loads | ⬜ |
 | 7 | Pick an answer, tap **Next** | Transitions to next KPI within 2 sec | ⬜ |
 | 8 | Tap back to dashboard | Score may have updated | ⬜ |
 | 9 | Tap **Insights** (chat) | Chat screen loads with suggested prompts | ⬜ |
 | 10 | Tap "Where am I weakest?" suggestion | Streaming reply appears within 3 sec | ⬜ |
-| 11 | Reply mentions specific KPIs by name | ✅ (advisor is grounded in real data) | ⬜ |
+| 11 | Reply mentions specific KPIs by name | Done (advisor is grounded in real data) | ⬜ |
 | 12 | Tap **Profile** | Profile screen loads with user info | ⬜ |
 | 13 | Tap **Log out** | Returns to Login screen | ⬜ |
 
@@ -78,7 +78,7 @@ Comprehensive coverage of all major flows. Run before tagging a release.
 | A4 | Tap **Register** | OTP screen appears |
 | A5 | Dev mode shows amber banner with OTP | Banner has 6-digit code |
 | A6 | Tap to autofill, tap **Verify** | Lands on Dashboard |
-| A7 | Dashboard shows fresh state (no assessment yet, score = 0) | All level tiles show "—" or zero |
+| A7 | Dashboard shows fresh state (no assessment yet, score = 0) | All level tiles show "" or zero |
 
 ### B. Register (ENTERPRISE admin + invite employee)
 
@@ -144,15 +144,15 @@ Comprehensive coverage of all major flows. Run before tagging a release.
 | F3 | Enter your real email | Form accepts |
 | F4 | Tap Submit | OTP screen appears |
 | F5 | **Check your real email inbox** | OTP email arrives within 30 sec (might be in Spam) |
-| F6 | Email sender shows "CyberScore" | ✅ |
-| F7 | Email subject: "Your CyberScore verification code" | ✅ |
-| F8 | Email body contains 6-digit code | ✅ |
+| F6 | Email sender shows "CyberScore" | Done |
+| F7 | Email subject: "Your CyberScore verification code" | Done |
+| F8 | Email body contains 6-digit code | Done |
 | F9 | Enter the OTP, tap Next | Set new password screen |
 | F10 | Enter new password (8+ chars, mixed) | Form accepts |
 | F11 | Tap Reset | Returns to login |
 | F12 | Log in with new password | Dashboard |
 
-**This is the most important E2E test** — it touches the full Brevo email pipeline.
+**This is the most important E2E test**: it touches the full Brevo email pipeline.
 
 ### G. Framework switching (admin-only)
 
@@ -171,7 +171,7 @@ Comprehensive coverage of all major flows. Run before tagging a release.
 |---|---|---|
 | H1 | Profile → Enable TOTP | QR code shown |
 | H2 | Scan with Google Authenticator / Authy | App generates 6-digit codes |
-| H3 | Enter current code, tap Verify | Success — TOTP enabled |
+| H3 | Enter current code, tap Verify | Success, TOTP enabled |
 | H4 | Log out | |
 | H5 | Log in with email + password | After password, TOTP prompt appears |
 | H6 | Enter authenticator code | Lands on Dashboard |
@@ -197,7 +197,7 @@ Comprehensive coverage of all major flows. Run before tagging a release.
 | J3 | Tap any screen that requires API | App refreshes JWT silently and shows screen |
 | J4 | No login screen reappears | Refresh worked |
 
-*Easier to test by manually expiring the token in SecureStore — long path otherwise.*
+*Easier to test by manually expiring the token in SecureStore, long path otherwise.*
 
 ---
 
