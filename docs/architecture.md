@@ -67,7 +67,7 @@ flowchart LR
 
 | | |
 |---|---|
-| Framework | Next.js 15.1 (App Router, `output: 'standalone'`) |
+| Framework | Next.js 15.5 (App Router). `output: 'standalone'` is conditional on `!process.env.VERCEL`, so it only kicks in for non-Vercel hosts. |
 | Language | TypeScript 5.7 |
 | Auth | JWT (15min) + opaque refresh tokens (7d, bcrypt-hashed at rest) |
 | Passwords | Argon2id (OWASP-recommended params) + HIBP breach check on register |
@@ -137,7 +137,7 @@ sequenceDiagram
 | **Argon2id over bcrypt** | OWASP-recommended for new applications. Memory-hard, GPU-resistant. We still use bcrypt for *short* secrets (refresh tokens, OTPs, invite tokens) where argon2's 64MB memory cost would be wasteful. |
 | **JWT + refresh tokens** | Stateless access tokens mean the API doesn't hit Postgres on every request just to validate auth. Refresh tokens are opaque + bcrypt-hashed at rest so a DB leak can't be used to impersonate users. |
 | **NativeWind over StyleSheet** | Tailwind ergonomics in RN. Falls back to inline styles for dynamic values. Keeps the design system in one place. |
-| **Anthropic SDK + prompt caching** | Sonnet 4.5 for quality, Haiku as the budget-exhausted fallback. Prompt caching on the scorecard JSON drops follow-up turns to ~10% of the input cost. |
+| **Local rule-based advisor (default) plus Anthropic SDK fallback** | The chat endpoint defaults to a deterministic rule-based advisor (`apps/api/src/lib/advisor-local.ts`) that grounds replies in the user's actual scorecard plus a hand-curated sector knowledge primer for eight industries. Zero external cost. Flipping `USE_LOCAL_ADVISOR=false` routes the chat through Anthropic Claude instead, Sonnet 4.6 primary, Haiku 4.5 budget fallback, with prompt caching on the system block so follow-up turns within the 5-minute cache window cost about ten percent of the input cost. |
 | **react-native-sse over fetch streaming** | RN 0.76 with old architecture (Bridgeless off) doesn't expose `Response.body` as a usable `ReadableStream`. `react-native-sse` uses XMLHttpRequest under the hood, which streams correctly on both archs. |
 | **Zod everywhere** | Single source of truth for request/response shapes. Mobile and API import the same `RegisterRequest` schema; the API parses with it, mobile knows the type without redefinition. |
 | **expo-router v4** | File-based routing means navigation structure is visible in the file tree. Typed routes prevent broken links at compile time. |
@@ -184,11 +184,15 @@ The 46 KPIs, their tiers, weights, framework mappings, and remediation suggestio
 
 ## Deployment topology
 
-See [deployment.md](deployment.md) for the prod runbook. Summary:
+See [deployment.md](deployment.md) for the full runbook. Summary of what is actually deployed today:
 
-- **API** → Vercel (Next.js native), or any Docker-capable host. Image is small thanks to `output: 'standalone'`.
-- **Workers** → separate process. In dev: `npm run worker`. In prod: a single container/dyno running the same image with `node ./dist/workers/index.js`.
-- **Postgres** → managed (Supabase / Neon / AWS RDS). RLS policies live in `apps/api/prisma/migrations/*/rls.sql`.
-- **Redis** → managed (Upstash / Redis Cloud). Used for queues + cache + rate limits.
-- **Files** → Cloudflare R2 or AWS S3 for evidence uploads. Presigned URLs; the API never proxies bytes.
-- **Mobile** → Expo EAS Build + EAS Submit. OTA updates via EAS Update.
+- **API.** Vercel Hobby tier (free). Pinned to the `sin1` (Singapore) region via `apps/api/vercel.json` so functions sit in the same datacenter as Neon and Upstash. Per-query database round trips are under ten milliseconds as a result. Auto-deploys on every push to `main`. Live URL: https://cyberscore-api.vercel.app
+- **Workers.** Not deployed in the current setup. Email sending was moved inline (see queue.ts) because there is no worker process running on Vercel. The other queue types (snapshot, push, abandonment) are dormant. If a future batch deploys a non-Vercel host with a real background process, the worker code in `apps/api/src/workers/` will pick up where it left off.
+- **Postgres.** Neon Free tier in Singapore. 3 GB of storage. Compute scales to zero after idle but a free cron at https://console.cron-job.org pings `/api/v1/keepwarm` every two minutes, which runs `SELECT 1` against the database so it does not sleep. Seven migrations have been applied: init, enterprise_mode, per_user_progress, add_allowed_levels, add_chat_threads, add_response_matched_tier_relation, rls_policies.
+- **Redis.** Upstash Free tier in Singapore. 10 000 commands per day. Used for rate-limit counters and the KPI catalogue cache.
+- **Email.** Brevo Free tier (300 emails per day). Sends through the HTTPS REST API at `api.brevo.com/v3/smtp/email` rather than raw SMTP because Vercel serverless throttles outbound TCP on ports 465 and 587. The helper in `apps/api/src/lib/email.ts` auto-detects the provider from the `SMTP_PASS` prefix (`xkeysib-` for Brevo, `re_` for Resend) and routes accordingly.
+- **Files.** Cloudflare R2 not wired yet. Routes exist (`/evidence/presign`, `/evidence/confirm`) but the credentials are placeholders. See roadmap.
+- **Mobile.** Expo EAS Build. The `preview` profile produces a sideloadable APK; the `production` profile produces a Play Store AAB. Both bake the live API URL into the bundle at build time via `EXPO_PUBLIC_API_URL`.
+- **Keep-warm cron.** Free job at https://console.cron-job.org hits `/api/v1/keepwarm` every two minutes. That endpoint spins up eight common dashboard lambdas in parallel (each first hit is otherwise a separate cold start) plus runs the cheap database ping above. Drops cold-start lag from 5 to 10 seconds per route down to about 200 milliseconds.
+
+Total monthly cost at the time of handover: zero rupees. Every service is on its free tier and the daily caps are well above what a demo plus a few real users would consume.

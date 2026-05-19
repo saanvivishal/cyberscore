@@ -2,13 +2,15 @@
 
 A frank inventory of what doesn't work, what's incomplete, and what the next person should expect to run into.
 
+> **What changed in v0.3.1** (relative to v0.3.0): performance pass and one demo-affecting fix. Vercel serverless functions are now pinned to the Singapore region (`sin1`) so they sit in the same datacenter as Neon and Upstash. Per-query database latency dropped from around 250 milliseconds to under 10 milliseconds. A new `/api/v1/keepwarm` endpoint warms eight dashboard lambdas plus the Neon compute in a single HTTP call; the cron-job.org job now hits that endpoint every two minutes instead of just `/api/v1/health`. The login rate limit was bumped from 5 attempts per 15 minutes to 30 (5 was tripping honest testers who fumbled the password). And the demo user `saanvi.vishal@iiitb.ac.in` was reseeded as an ENTERPRISE admin (was SOLO before) so the dashboard's Company Rollup banner with the MANAGE button now shows on first login.
+>
 > **What changed in v0.3.0** (relative to v0.2.0): the project is now **fully deployed**. API on Vercel, Postgres on Neon, Redis on Upstash, email on Brevo. The Android APK is built via EAS and installs standalone on real phones. Several deployment-only bugs were hit and fixed: the BullMQ email queue was bypassed in favour of inline sending (because no worker runs on Vercel), Brevo's HTTP API replaced raw SMTP (Vercel throttles outbound TCP on 465/587), an external `cron-job.org` job pings `/api/v1/health` every 2 minutes to defeat cold starts, the onboarding carousel `index.tsx` redirect was fixed (it was hardcoded to skip onboarding and go straight to login), and the KPI question screen now parallelises its writes for a 2-3× speedup on Next-tap.
 >
 > **What changed in v0.2.0** (relative to v0.1.0): the four `ApiError.title` TypeScript errors are fixed (added a `title` getter on `ApiError`). The `Response.matchedTier` typo is fixed (relation now defined in the schema; FK migration applied). RLS policies are now present in `migrations/20260516123100_rls_policies/` and applied. The chat endpoint has a 20-msg/minute per-user rate limit. And the AI chat now defaults to a **local rule-based advisor** that uses your scorecard + a sector knowledge primer, no Anthropic API budget required.
 
 ## A. Bugs you'll trip over
 
-### A1. Pre-existing TypeScript errors, Done FIXED in v0.2.0
+### A1. Pre-existing TypeScript errors, Fixed in v0.2.0
 
 All 5 errors flagged in v0.1.0 are resolved:
 
@@ -17,7 +19,7 @@ All 5 errors flagged in v0.1.0 are resolved:
 
 `npm run typecheck` from the repo root passes clean.
 
-### A2. Anthropic billing dependency, Done MITIGATED in v0.2.0
+### A2. Anthropic billing dependency, Mitigated in v0.2.0
 
 The chat endpoint now defaults to a local rule-based advisor that requires no external API. See [§E. Local Advisor](#e-local-advisor) below.
 
@@ -48,7 +50,7 @@ npx expo start --clear
 
 Without this, you get `Unable to resolve module` errors even though the package is installed.
 
-### A6. Email worker fails when SMTP isn't configured, Done ARCHITECTURE CHANGED in v0.3.0
+### A6. Email worker fails when SMTP isn't configured, Architecture changed in v0.3.0
 
 In v0.1.0 / v0.2.0 the email worker process was where OTP and invite emails actually got sent. On Vercel we don't run that worker (no background process, only request-bound serverless functions), so emails sat in Redis forever with nothing to drain them. Symptom: API returns 200 with `otpSent: true` but no email ever arrives.
 
@@ -56,7 +58,7 @@ Fix in v0.3.0: `apps/api/src/lib/queue.ts` was patched so `enqueueOtpEmail()` an
 
 If you're deploying on a stack with a real worker process (Render, Fly.io, your own VM), you may want to revert this, see git blame on `queue.ts` for the diff.
 
-### A8. Vercel cold starts make every screen feel laggy, Done MITIGATED in v0.3.0
+### A8. Vercel cold starts make every screen feel laggy, Mitigated in v0.3.0
 
 On Vercel Hobby tier, each Next.js route handler is its own serverless function. Functions go idle after ~5 minutes of no traffic. The first request after idle pays a 5-10 second cold-start tax to spin up a fresh container. Mobile apps make many small API calls per screen, so that lag compounds, every screen transition felt like it was hanging.
 
@@ -66,7 +68,7 @@ Additionally, the KPI question screen was patched to parallelise its two writes 
 
 For production-scale: upgrade Vercel to Pro tier (cold starts are eliminated by their always-warm infrastructure) or migrate to a non-serverless host like Render / Fly.io / Railway where the process stays alive.
 
-### A9. Vercel doesn't accept raw outbound SMTP reliably, Done FIXED in v0.3.0
+### A9. Vercel doesn't accept raw outbound SMTP reliably, Fixed in v0.3.0
 
 Vercel serverless functions can technically open outbound TCP to port 465 / 587, but they sometimes hang silently and consume the full request budget before timing out. Nodemailer's `transport.sendMail()` is particularly vulnerable since it doesn't expose a tunable connection timeout.
 
@@ -78,7 +80,7 @@ Fix in v0.3.0: `apps/api/src/lib/email.ts` auto-detects the email provider from 
 
 This is faster (no TCP handshake), more reliable (plain HTTPS that Vercel handles natively), and uses the same credentials.
 
-### A10. Onboarding carousel was bypassed on cold start, Done FIXED in v0.3.0
+### A10. Onboarding carousel was bypassed on cold start, Fixed in v0.3.0
 
 `app/index.tsx` was hardcoded to `<Redirect href="/(auth)/login" />` which short-circuited the 3-slide onboarding carousel that existed at `app/(auth)/onboarding.tsx`. The carousel was finished, styled, and routed correctly, but unreachable.
 
@@ -90,7 +92,7 @@ Older versions of `apps/mobile/package.json` had `"start": "expo start --dev-cli
 
 ## B. Incomplete features
 
-### B1. RLS policies, Done FIXED in v0.2.0
+### B1. RLS policies, Fixed in v0.2.0
 
 Policies for every tenant-scoped table are now defined in `apps/api/prisma/migrations/20260516123100_rls_policies/migration.sql`. The migration:
 
@@ -131,7 +133,7 @@ Pre-existing, `me.email` is read on a context type that doesn't declare it. Does
 
 ## C. Architectural gaps
 
-### C1. Chat streaming rate limit, Done FIXED in v0.2.0
+### C1. Chat streaming rate limit, Fixed in v0.2.0
 
 The POST `/ai/chat/threads/[id]/messages` endpoint now applies a per-user limit of 20 messages per minute via the existing Redis sliding-window helper. Exceeds return 429 with a `Retry-After` header.
 

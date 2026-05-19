@@ -28,7 +28,7 @@ Within ENTERPRISE, the admin sets each employee's `allowedLevels Level[]` (any s
 | ID | Requirement |
 |---|---|
 | FR-AUTH-1 | Users can register in one of three modes: SOLO, ENTERPRISE_ADMIN (creates a new company keyed by email domain), ENTERPRISE_EMPLOYEE (auto-joins by email domain match) |
-| FR-AUTH-2 | Registration is gated by a 6-digit OTP sent to the registering email. OTP expires in 10 minutes, max 5 attempts. (In dev mode the OTP is returned in the API response so testing is possible without SMTP.) |
+| FR-AUTH-2 | Registration is gated by a 6-digit OTP sent to the registering email. OTP expires in 10 minutes, max 5 attempts. In production the OTP is delivered through Brevo's HTTPS REST API (auto-detected from the `SMTP_PASS` prefix). In local development without a Brevo key the OTP is returned inline in the API response so testing works without any SMTP setup. |
 | FR-AUTH-3 | Free email providers (gmail, yahoo, etc.) are rejected for ENTERPRISE_ADMIN registration |
 | FR-AUTH-4 | Passwords must be ≥12 characters; the API checks them against the Have I Been Pwned k-anonymity API and rejects breached passwords |
 | FR-AUTH-5 | Login issues a short-lived JWT (15min) + a longer-lived refresh token (7d). The mobile SDK refreshes transparently on 401. |
@@ -93,7 +93,8 @@ Within ENTERPRISE, the admin sets each employee's `allowedLevels Level[]` (any s
 | FR-AI-5 | System prompt includes the user's live scorecard JSON, wrapped with `cache_control: ephemeral` so follow-up turns within 5 minutes hit Anthropic's prompt cache |
 | FR-AI-6 | User input is wrapped in `<user_content>` tags and the model is instructed to treat that content as untrusted data, not instructions (prompt injection mitigation) |
 | FR-AI-7 | The API records token usage per call to `ai_usage` |
-| FR-AI-8 | When daily spend exceeds `ANTHROPIC_DAILY_BUDGET_USD`, the API auto-falls-back from Sonnet 4.5 to Haiku 4.5; once both budgets exhausted, returns `AI_BUDGET_EXHAUSTED` |
+| FR-AI-8 | When daily spend exceeds `ANTHROPIC_DAILY_BUDGET_USD`, the API auto-falls-back from Sonnet 4.6 to Haiku 4.5. Once both budgets are exhausted, the API returns `AI_BUDGET_EXHAUSTED`. |
+| FR-AI-10 | The chat endpoint defaults to a local rule-based advisor (`USE_LOCAL_ADVISOR=true`) that runs entirely inside the API process. Zero external API calls, zero cost. Replies are still streamed word-by-word over Server-Sent Events so the mobile UI behaves identically. The advisor reads the user's actual scorecard plus a hand-curated sector knowledge primer for eight industries (Banking, Healthcare, Technology, Manufacturing, Retail, Education, Government, Other). Flipping `USE_LOCAL_ADVISOR=false` switches to Anthropic Claude without any code or mobile change. |
 | FR-AI-9 | Per-org daily call cap (`AI_FREE_DAILY_CALLS`) protects against runaway spend by a single tenant |
 
 ### 3.7 Notifications

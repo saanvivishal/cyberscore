@@ -42,7 +42,7 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/cyberscore?schema=pub
 DIRECT_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/cyberscore?schema=public
 ```
 
-`DATABASE_URL` is what Prisma reads. `DIRECT_DATABASE_URL` is used for migrations when the primary URL goes through a connection pooler (e.g. Supabase pgBouncer).
+`DATABASE_URL` is what Prisma reads at runtime. `DIRECT_DATABASE_URL` is used for migrations. In production we point at Neon's pooled connection for `DATABASE_URL` and the direct connection for `DIRECT_DATABASE_URL`. In local development both can be the same localhost URL.
 
 To inspect data visually: `cd apps/api && npx prisma studio` opens a browser at `localhost:5555`.
 
@@ -162,11 +162,13 @@ This means a bug in application code (e.g. forgetting a `where: { orgId }` claus
 
 Each migration in `apps/api/prisma/migrations/` has a `migration.sql` that's applied verbatim. Order:
 
-1. `20260423115340_init`, initial 21-table schema
-2. `20260429000000_enterprise_mode`, added `OrgMode`, `JoinMode`, `AnswerScope`, invites, enterprise fields on `organisations`
-3. `20260429000001_per_user_progress`, moved `assessment_progress` from org-keyed to (org, user)-keyed
-4. `20260506080246_add_allowed_levels`, added `User.allowedLevels` and `Invite.allowedLevels` for per-user assessment gating
-5. `20260516074342_add_chat_threads`, added `chat_threads` + `chat_messages` for the AI advisor
+1. `20260423115340_init`. Initial 21-table schema.
+2. `20260429000000_enterprise_mode`. Added `OrgMode`, `JoinMode`, `AnswerScope`, invites, enterprise fields on `organisations`.
+3. `20260429000001_per_user_progress`. Moved `assessment_progress` from org-keyed to (org, user)-keyed.
+4. `20260506080246_add_allowed_levels`. Added `User.allowedLevels` and `Invite.allowedLevels` for per-user assessment gating.
+5. `20260516074342_add_chat_threads`. Added `chat_threads` and `chat_messages` for the AI advisor.
+6. `20260516123040_add_response_matched_tier_relation`. Added a proper Prisma relation from `Response` to `ScoringTier` so the admin team scorecard can show tier-distribution views. Includes a data cleanup step that NULL-s out orphaned `matchedTierId` rows from earlier reseeds before adding the foreign key.
+7. `20260516123100_rls_policies`. Enables FORCE Row-Level Security on the 19 tenant-scoped tables. Adds helper functions `current_org_id()` and `rls_bypass()` so policies are uniform across tables. Honours `app.bypass_rls = 'on'` so worker, registration, and login flows can still operate cross-tenant. KPI catalogue tables (`kpis`, `scoring_tiers`, `kpi_versions`, `kpi_suggestions`, `industry_benchmarks`) are deliberately not under RLS because they are shared across all tenants.
 
 To create a new migration:
 
@@ -192,14 +194,25 @@ All hot-path lookups are indexed. Notable choices:
 - `chat_threads (orgId, userId, updatedAt DESC)`. Thread list ordering
 - `ai_usage (orgId, day, model)` unique, daily aggregation upsert
 
-## Sample data (test account)
+## Sample data (demo account)
 
-After seeding + running the local app:
+The demo user lives in the production Neon database and is also planted by `npm run db:seed` into any local development database that imports the same seed.
 
 | | |
 |---|---|
 | Email | `saanvi.vishal@iiitb.ac.in` |
-| Password | (reset via `/auth/password-reset/request`, dev mode returns the OTP inline) |
-| Org | SOLO mode, Technology industry, EXCEL framework |
+| Password | `cyberscore-demo-2026` |
+| Org | IIIT Bangalore, ENTERPRISE mode, Banking industry, EXCEL framework |
+| Role | ADMIN with all three allowed levels (PEOPLE, PROCESS, COMPANY) |
+| State | All 46 KPIs already answered, so the dashboard shows a populated scorecard |
 
-To create a fresh enterprise admin for testing the team flow, see [docs/known-issues.md](known-issues.md#testing-the-enterprise-flow-locally).
+To re-plant or reset this user against any database (including the production Neon URL), run:
+
+```bash
+cd apps/api
+DATABASE_URL='postgresql://...' npx tsx scripts/seed-demo-user.ts
+```
+
+The script is idempotent. It reads `DEMO_EMAIL`, `DEMO_PASSWORD`, `DEMO_ORG_NAME`, `DEMO_INDUSTRY`, and `DEMO_NAME` from environment variables if you want to plant a different user, otherwise it uses the defaults shown above.
+
+To create a fresh enterprise admin for testing the team flow end to end, see the manual test plan at [docs/testing-manual.md](testing-manual.md). The full curl-based walkthrough is in section E of [docs/known-issues.md](known-issues.md).

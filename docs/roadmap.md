@@ -8,15 +8,21 @@ These block a real production launch.
 
 | Item | Effort | Why |
 |---|---|---|
-| Apply RLS policies to all tenant tables | M | The schema assumes RLS; without it any authenticated user could query other orgs' data. See [known-issues.md §B1](known-issues.md#b1-rls-policies-arent-in-migrations) |
-| Write a basic test suite | L | Zero tests today. Target ≥60% coverage on `lib/scoring.ts`, `lib/scorecard.ts`, `lib/access.ts`, `lib/auth.ts` first |
-| Set up CI on GitHub Actions | S | Lint + typecheck + test on every PR, automated migration on merge to `main`. Template in [deployment.md](deployment.md#cicd) |
-| Fix the four pre-existing TS errors | S | `ApiError.title` and `Response.matchedTier`, see [known-issues.md §A1](known-issues.md#a1-pre-existing-typescript-errors) |
-| Wire real SMTP credentials | S | OTPs + invites + scorecard PDFs all depend on this in prod |
-| Wire R2/S3 for evidence | S | The plumbing exists; just needs real credentials and a CORS policy on the bucket |
-| Generate `EXPO_PUBLIC_API_URL` from EAS secrets | S | So the production mobile build hits the production API, not localhost |
-| Add per-minute rate limit to AI chat | S | Prevents one user burning the org's daily Anthropic budget by spamming the chat |
-| Map Anthropic errors to friendly UI text | S | Currently `Your credit balance is too low...` shows raw to the user |
+| Write a basic test suite | L | Zero tests today. Target sixty percent coverage on `lib/scoring.ts`, `lib/scorecard.ts`, `lib/access.ts`, `lib/auth.ts` first. The supervisor's number-one ask. |
+| Set up CI on GitHub Actions | S | Lint, typecheck, and test on every pull request. Automated `prisma migrate deploy` against a staging Neon branch on merge to `main`. Template in [deployment.md](deployment.md). |
+| Wire Sentry for error tracking | S | The `SENTRY_DSN` env var is already read by `apps/api/instrumentation.ts`. Sign up for a free Sentry account, paste the DSN into Vercel, redeploy. Errors then show up grouped with stack traces. |
+| Set up a staging Neon branch | S | One free Neon project can have multiple branches. Run migrations against the staging branch first, then promote. Today everything goes straight to production. |
+| Wire R2 / S3 for evidence uploads | S | The schema, the presigned URL endpoint, and the confirm endpoint all exist. Needs real credentials in `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` / `R2_ENDPOINT` plus a CORS policy on the bucket. |
+| Map remaining Anthropic errors to friendly UI text | S | The mobile chat now defaults to the local advisor so this is rare, but if a future batch flips `USE_LOCAL_ADVISOR=false` and hits a quota error, the raw `Your credit balance is too low` should not surface to the user. |
+| Verify all RLS policies under realistic multi-tenant load | M | The policies are committed (v0.2.0) and applied (v0.3.0). What is missing is a stress test where two tenants hit overlapping endpoints concurrently to confirm Postgres returns nothing for the wrong tenant. |
+
+Items that used to be on this list and are now done:
+
+- *Apply RLS policies to all tenant tables.* Done in v0.2.0, migration `20260516123100_rls_policies` enables FORCE RLS on all 19 tenant-scoped tables.
+- *Fix the four pre-existing TypeScript errors.* Done in v0.2.0 via the `title` getter on `ApiError` and the proper `matchedTier` relation.
+- *Wire real SMTP credentials.* Done in v0.3.0 through Brevo's HTTP API (300 emails per day free). Auto-detected in `lib/email.ts`.
+- *Generate `EXPO_PUBLIC_API_URL` from EAS secrets.* Done in v0.3.0 in `apps/mobile/eas.json` (both the `preview` and `production` profiles bake the live Vercel URL).
+- *Add per-minute rate limit to AI chat.* Done in v0.2.0 (20 messages per minute per user via Redis sliding window).
 
 ## Near-term features
 
@@ -97,7 +103,7 @@ A read-only web view (Next.js can do this in the same monorepo) so users can pul
 
 ### M8. Multi-region / data residency (L)
 
-EU customers will eventually demand EU-hosted data. The app is region-agnostic; the work is mainly DevOps: deploy a second Vercel + Supabase pair in `eu-west-1` and add a `region` column to organisations that routes their traffic.
+EU customers will eventually demand EU-hosted data. The app is region-agnostic; the work is mainly DevOps: deploy a second Vercel + Neon pair in an EU region (Neon supports `eu-central-1` and others), add a `region` column to organisations, and route each org's traffic to the right pair. Today everything lives in Singapore.
 
 ## Far-term / blue sky
 
