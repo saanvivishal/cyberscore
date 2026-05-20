@@ -157,13 +157,52 @@ export async function enqueueInviteEmail(payload: Omit<EmailInviteJob, 'type'>):
   }
 }
 
+// Snapshot write moved inline for the same reason email was moved inline:
+// on Vercel there is no background worker draining BullMQ, so a queued
+// job sits in Redis forever and no row ever lands in scorecard_snapshots.
+// The user's Analytics trend chart then has nothing to plot.
+//
+// We also intentionally drop the per-org dedup. The original design
+// debounced multiple KPI submissions into one snapshot so a burst write
+// did not flood the table. With inline writes we want the opposite:
+// every submission produces a row so the trend chart has a real point
+// for each meaningful change in the user's scorecard.
+//
+// The function name stays `enqueueSnapshot` so every caller works
+// unchanged. The cost on the request thread is two parallel SELECTs
+// (KPIs + responses) plus one INSERT, roughly 50 to 150 ms warm.
+// Callers already invoke this with .catch() (fire-and-forget), so a
+// transient failure does not surface to the user.
 export async function enqueueSnapshot(payload: SnapshotJob): Promise<void> {
-  // dedupe: one pending snapshot per org at a time. BullMQ rejects ':' in
-  // custom jobIds, so we use '_' as the separator.
-  await queues.snapshot().add('snapshot', payload, {
-    jobId: `snapshot_${payload.orgId}`,
-    removeOnComplete: true,
-  });
+  const { withBypassRls } = await import('./prisma');
+  const { aggregate, loadScorecardInputs } = await import('./scorecard');
+
+  try {
+    await withBypassRls(async (tx) => {
+      const { kpis, responses } = await loadScorecardInputs(tx, payload.orgId);
+      if (responses.length === 0) {
+        // Nothing answered yet, do not write an empty snapshot.
+        return;
+      }
+      const agg = aggregate(kpis, responses);
+      await tx.scorecardSnapshot.create({
+        data: {
+          orgId: payload.orgId,
+          peopleScore: agg.peopleScore,
+          processScore: agg.processScore,
+          companyScore: agg.companyScore,
+          overallScore: agg.overallScore,
+          completeness: agg.completeness,
+        },
+      });
+    });
+  } catch (err) {
+    logger.error(
+      { err, orgId: payload.orgId, reason: payload.reason },
+      'Inline snapshot write failed',
+    );
+    throw err;
+  }
 }
 
 export async function enqueuePush(payload: PushJob): Promise<void> {
