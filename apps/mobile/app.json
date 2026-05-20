@@ -1,10 +1,10 @@
 {
   "expo": {
     "name": "CyMetric",
-    "slug": "cymetric",
+    "slug": "cyberscore",
     "version": "0.1.0",
     "orientation": "portrait",
-    "scheme": "cymetric",
+    "scheme": "cyberscore",
     "userInterfaceStyle": "dark",
     "newArchEnabled": false,
     "backgroundColor": "#05060d",
