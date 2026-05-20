@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { ErrorCodes } from '@cyberscore/types';
+import { ErrorCodes } from '@cymetric/types';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/require-admin';
 import { parseJson, problem, internalError } from '@/lib/problem';

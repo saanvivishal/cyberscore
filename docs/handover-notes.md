@@ -8,7 +8,7 @@ A narrative, in plain English, of how this project was built, what decisions wer
 
 ## How to use this document
 
-If you're the next batch picking up CyberScore:
+If you're the next batch picking up CyMetric:
 
 1. **Read this whole file end-to-end first.** Don't skim. The "Lessons learned" section will save you ~2 weeks of pain that I burned through.
 2. Read [README.md](../README.md), then [HANDOVER_CHECKLIST.md](../HANDOVER_CHECKLIST.md), then [docs/architecture.md](architecture.md).
@@ -273,7 +273,7 @@ The codebase has strong conventions, follow them:
 ### Architecture invariants, please don't break these
 
 - **API has no business logic in route handlers.** Logic lives in `lib/`. Route handlers parse + validate + call lib functions + format response.
-- **Mobile screens have no API logic.** API calls go through `@cyberscore/sdk` (typed) + React Query.
+- **Mobile screens have no API logic.** API calls go through `@cymetric/sdk` (typed) + React Query.
 - **No cross-module imports of internals.** `lib/scorecard` doesn't import from `lib/auth/internals/X`. Modules expose flat APIs.
 - **RLS or `withBypassRls()`. Never raw Prisma queries that touch tenant tables without one or the other.**
 

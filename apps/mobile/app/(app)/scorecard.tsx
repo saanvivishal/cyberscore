@@ -40,9 +40,9 @@ export default function Scorecard() {
     try {
       const res = await api.scorecard.createShare({ expiresInDays: 30 });
       await Share.share({
-        message: `Our CyberScore — ${res.shareUrl}`,
+        message: `Our CyMetric — ${res.shareUrl}`,
         url: res.shareUrl,
-        title: 'CyberScore',
+        title: 'CyMetric',
       });
     } catch (err: any) {
       Alert.alert('Share failed', err?.message ?? 'Please try again.');

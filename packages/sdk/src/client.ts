@@ -44,7 +44,7 @@ import type {
   UpdateMemberLevelsResponse,
   VerifyOtpRequest,
   VerifyOtpResponse,
-} from '@cyberscore/types';
+} from '@cymetric/types';
 import { ApiError, NetworkError } from './errors';
 
 export interface TokenStorage {
@@ -53,7 +53,7 @@ export interface TokenStorage {
   clearTokens(): Promise<void>;
 }
 
-export interface CyberScoreClientConfig {
+export interface CyMetricClientConfig {
   baseUrl: string;
   storage: TokenStorage;
   fetchImpl?: typeof fetch;
@@ -73,7 +73,7 @@ interface RequestOptions {
   headers?: Record<string, string>;
 }
 
-export class CyberScoreClient {
+export class CyMetricClient {
   private readonly baseUrl: string;
   private readonly storage: TokenStorage;
   private readonly fetchImpl: typeof fetch;
@@ -84,7 +84,7 @@ export class CyberScoreClient {
   // In-flight refresh promise — dedupe concurrent 401s.
   private refreshPromise: Promise<TokenPair> | null = null;
 
-  constructor(config: CyberScoreClientConfig) {
+  constructor(config: CyMetricClientConfig) {
     this.baseUrl = config.baseUrl.replace(/\/$/, '');
     this.storage = config.storage;
     this.fetchImpl = config.fetchImpl ?? fetch;
@@ -433,6 +433,6 @@ export class CyberScoreClient {
   };
 }
 
-export function createCyberScoreClient(config: CyberScoreClientConfig): CyberScoreClient {
-  return new CyberScoreClient(config);
+export function createCyMetricClient(config: CyMetricClientConfig): CyMetricClient {
+  return new CyMetricClient(config);
 }

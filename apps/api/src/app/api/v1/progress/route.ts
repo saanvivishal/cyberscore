@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { ErrorCodes, Level } from '@cyberscore/types';
-import { SaveProgressRequest } from '@cyberscore/types';
+import { ErrorCodes, Level } from '@cymetric/types';
+import { SaveProgressRequest } from '@cymetric/types';
 import { withTenant } from '@/lib/prisma';
 import { requireAuth } from '@/lib/require-auth';
 import { parseJson, problem, internalError } from '@/lib/problem';

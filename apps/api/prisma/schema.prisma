@@ -1,4 +1,4 @@
-// CyberScore — production schema
+// CyMetric — production schema
 // 21 tables. cuid2 primary keys. Every mutable table has deletedAt.
 // RLS policies live in prisma/migrations/*/rls.sql (applied after migrate deploy).
 

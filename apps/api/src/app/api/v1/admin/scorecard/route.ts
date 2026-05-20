@@ -6,7 +6,7 @@ import {
   Role,
   type ConsensusSignal,
   type TeamScorecardResponse,
-} from '@cyberscore/types';
+} from '@cymetric/types';
 import { withTenant } from '@/lib/prisma';
 import { problem, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';

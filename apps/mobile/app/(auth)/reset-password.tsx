@@ -10,8 +10,8 @@ import {
   Alert,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ApiError } from '@cyberscore/sdk';
-import { ErrorCodes } from '@cyberscore/types';
+import { ApiError } from '@cymetric/sdk';
+import { ErrorCodes } from '@cymetric/types';
 import { Screen } from '@/components/Screen';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';

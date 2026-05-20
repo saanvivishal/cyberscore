@@ -3,7 +3,7 @@ import {
   AcceptInviteRequest,
   ErrorCodes,
   InviteStatus,
-} from '@cyberscore/types';
+} from '@cymetric/types';
 import { hashPassword, issueTokenPair } from '@/lib/auth';
 import { checkPwnedPassword } from '@/lib/hibp';
 import { withBypassRls } from '@/lib/prisma';

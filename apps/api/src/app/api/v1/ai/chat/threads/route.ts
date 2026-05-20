@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import {
   CreateChatThreadRequest,
   type ChatThreadListResponse,
-} from '@cyberscore/types';
+} from '@cymetric/types';
 import { withTenant } from '@/lib/prisma';
 import { internalError, parseJson } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';

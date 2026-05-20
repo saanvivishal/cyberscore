@@ -63,7 +63,12 @@ function isResendApiKey(pass: string | undefined): pass is string {
 // raw RFC-822 "Name <addr>" string. Parse our SMTP_FROM accordingly.
 function parseSenderHeader(from: string): { name?: string; email: string } {
   const match = from.match(/^\s*(.+?)\s*<\s*([^>]+)\s*>\s*$/);
-  if (match) return { name: match[1].trim(), email: match[2].trim() };
+  // The two capture groups are non-optional in this regex so they cannot
+  // actually be undefined at runtime, but strict TypeScript with
+  // noUncheckedIndexedAccess requires us to assert that explicitly.
+  if (match && match[1] && match[2]) {
+    return { name: match[1].trim(), email: match[2].trim() };
+  }
   return { email: from.trim() };
 }
 
@@ -153,20 +158,20 @@ export function otpEmailTemplate(args: { orgName: string; code: string }): {
   html: string;
   text: string;
 } {
-  const subject = 'Your CyberScore verification code';
+  const subject = 'Your CyMetric verification code';
   const text = `Hi ${args.orgName},
 
 Your verification code is: ${args.code}
 
 This code expires in 10 minutes. If you didn't request it, ignore this email.
 
-— CyberScore`;
+— CyMetric`;
 
   const html = `<!doctype html>
 <html><body style="font-family: system-ui, sans-serif; padding: 24px;">
   <h2>Verify your email</h2>
   <p>Hi <strong>${escapeHtml(args.orgName)}</strong>,</p>
-  <p>Your CyberScore verification code is:</p>
+  <p>Your CyMetric verification code is:</p>
   <p style="font-size: 32px; font-weight: 700; letter-spacing: 4px;">${args.code}</p>
   <p style="color: #666;">This code expires in 10 minutes. If you didn't request it, ignore this email.</p>
 </body></html>`;
@@ -182,7 +187,7 @@ export function inviteEmailTemplate(args: {
   inviteUrl: string;
   expiresAt: string; // ISO
 }): { subject: string; html: string; text: string } {
-  const subject = `You've been invited to join ${args.orgName} on CyberScore`;
+  const subject = `You've been invited to join ${args.orgName} on CyMetric`;
   const inviter = args.invitedByName ? `${args.invitedByName} (${args.orgName})` : args.orgName;
   const expiresHuman = new Date(args.expiresAt).toLocaleDateString(undefined, {
     weekday: 'short',
@@ -190,18 +195,18 @@ export function inviteEmailTemplate(args: {
     day: 'numeric',
   });
 
-  const text = `${inviter} invited you to join their CyberScore workspace.
+  const text = `${inviter} invited you to join their CyMetric workspace.
 
 Open this link to accept the invite and set your password:
 ${args.inviteUrl}
 
 This link expires on ${expiresHuman}. If you weren't expecting this, ignore the email.
 
-— CyberScore`;
+— CyMetric`;
 
   const html = `<!doctype html>
 <html><body style="font-family: system-ui, sans-serif; padding: 24px; max-width: 560px;">
-  <h2>You've been invited to CyberScore</h2>
+  <h2>You've been invited to CyMetric</h2>
   <p><strong>${escapeHtml(inviter)}</strong> invited you to join their workspace.</p>
   <p>
     <a href="${escapeHtml(args.inviteUrl)}"

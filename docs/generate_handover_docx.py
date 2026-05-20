@@ -162,7 +162,7 @@ for section in doc.sections:
 for section in doc.sections:
     footer = section.footer
     fp = footer.paragraphs[0]
-    fp.text = "CyberScore. Final report. Saanvi Vishal, IIIT Bangalore. Page "
+    fp.text = "CyMetric. Final report. Saanvi Vishal, IIIT Bangalore. Page "
     fp.alignment = WD_ALIGN_PARAGRAPH.CENTER
     for run in fp.runs:
         run.font.size = Pt(8)
@@ -174,7 +174,7 @@ for section in doc.sections:
 for _ in range(4):
     doc.add_paragraph()
 
-add_heading(doc, "CyberScore", level=0)
+add_heading(doc, "CyMetric", level=0)
 add_para(
     doc,
     "A Mobile-First Cybersecurity Health Scorecard for Organisations",
@@ -211,7 +211,7 @@ doc.add_page_break()
 add_heading(doc, "1. Abstract")
 add_para(
     doc,
-    "CyberScore is a mobile-first SaaS that lets a company check its own cybersecurity health in about thirty minutes. The user answers 46 questions split across three areas: People (workforce hygiene), Process (operational discipline), and Company (governance and risk). The app then gives them a live numeric score from zero to one hundred, shows which areas are weak, and offers personalised remediation suggestions. There is also a built-in AI advisor chat that grounds every reply in the user's actual scorecard, so the advice is specific to them rather than generic.",
+    "CyMetric is a mobile-first SaaS that lets a company check its own cybersecurity health in about thirty minutes. The user answers 46 questions split across three areas: People (workforce hygiene), Process (operational discipline), and Company (governance and risk). The app then gives them a live numeric score from zero to one hundred, shows which areas are weak, and offers personalised remediation suggestions. There is also a built-in AI advisor chat that grounds every reply in the user's actual scorecard, so the advice is specific to them rather than generic.",
 )
 add_para(
     doc,
@@ -235,13 +235,13 @@ add_para(
 )
 add_para(
     doc,
-    "CyberScore solves this by giving the company a structured self-assessment that takes about thirty minutes. At the end the company knows three things: what is their current score, where are the weakest areas, and what are the next three actions to take. It is not a substitute for a real audit, but it is a cheap and useful first step that any founder or IT lead can complete on their phone in one sitting.",
+    "CyMetric solves this by giving the company a structured self-assessment that takes about thirty minutes. At the end the company knows three things: what is their current score, where are the weakest areas, and what are the next three actions to take. It is not a substitute for a real audit, but it is a cheap and useful first step that any founder or IT lead can complete on their phone in one sitting.",
 )
 
 
 # ----- 3. Solution -----
 add_heading(doc, "3. Solution Overview")
-add_para(doc, "CyberScore has three parts that work together.")
+add_para(doc, "CyMetric has three parts that work together.")
 add_para(
     doc,
     "The mobile app is built with React Native and Expo. It is what the user actually interacts with. They sign in, take the assessment, see the scorecard, and chat with the advisor. Everything important happens here.",
@@ -551,7 +551,7 @@ add_bullets(
         "Evidence file uploads not wired. The schema and routes exist but the R2 credentials are placeholders.",
         "Push notifications are dormant. The schema, the worker, and the SDK plumbing all exist, but no admin UI triggers them.",
         "Scorecard PDF export not built.",
-        "Brevo's free tier rewrites the sender email to a generic relay domain. Display name CyberScore is preserved.",
+        "Brevo's free tier rewrites the sender email to a generic relay domain. Display name CyMetric is preserved.",
         "No staging environment. One production database and one production deployment.",
     ],
 )
@@ -606,7 +606,7 @@ add_bullets(
 add_heading(doc, "13. Conclusion")
 add_para(
     doc,
-    "CyberScore started as a five-week capstone and ended as a real, working, deployed product. The mobile app installs on a real Android phone. The API runs on Vercel. The database lives in Singapore. Emails arrive in real inboxes. The full happy path works end to end.",
+    "CyMetric started as a five-week capstone and ended as a real, working, deployed product. The mobile app installs on a real Android phone. The API runs on Vercel. The database lives in Singapore. Emails arrive in real inboxes. The full happy path works end to end.",
 )
 add_para(
     doc,
@@ -675,12 +675,12 @@ add_para(
 
 # Slide 1
 add_heading(doc, "Slide 1: Title")
-add_para(doc, "Title: CyberScore. A Cybersecurity Health Scorecard for Organisations.", bold=True)
+add_para(doc, "Title: CyMetric. A Cybersecurity Health Scorecard for Organisations.", bold=True)
 add_para(doc, "On the slide:", bold=True)
 add_bullets(
     doc,
     [
-        "Project name in large type: CyberScore",
+        "Project name in large type: CyMetric",
         "Tagline: Self-assessment cybersecurity in your pocket",
         "Your name and roll number: Saanvi Vishal, IMT2021043",
         "Mentor: Mohan Ram C, FISST",
@@ -691,7 +691,7 @@ add_bullets(
 add_para(doc, "Speaker note (about 30 seconds):", bold=True)
 add_para(
     doc,
-    "Introduce yourself, name the project, name the mentor and the institution. One sentence about what CyberScore is. A mobile app that lets a company check its cybersecurity health in thirty minutes and get specific advice on what to fix next.",
+    "Introduce yourself, name the project, name the mentor and the institution. One sentence about what CyMetric is. A mobile app that lets a company check its cybersecurity health in thirty minutes and get specific advice on what to fix next.",
     italic=True,
     color=MUTED,
 )
@@ -699,7 +699,7 @@ add_para(
 
 # Slide 2
 add_heading(doc, "Slide 2: The Problem and the Solution")
-add_para(doc, "Title: The Problem, and What CyberScore Does", bold=True)
+add_para(doc, "Title: The Problem, and What CyMetric Does", bold=True)
 add_para(doc, "On the slide (left side, the problem):", bold=True)
 add_bullets(
     doc,
@@ -722,7 +722,7 @@ add_bullets(
 add_para(doc, "Speaker note (about 90 seconds):", bold=True)
 add_para(
     doc,
-    "Describe the problem in plain language. A founder running a small fintech with five engineers cannot afford a security audit. They know they should do something but they do not know what. CyberScore is a structured self-assessment that gives them a score, shows them where they are weak, and tells them the next three actions. Not a replacement for a real audit, but a cheap and useful first step.",
+    "Describe the problem in plain language. A founder running a small fintech with five engineers cannot afford a security audit. They know they should do something but they do not know what. CyMetric is a structured self-assessment that gives them a score, shows them where they are weak, and tells them the next three actions. Not a replacement for a real audit, but a cheap and useful first step.",
     italic=True,
     color=MUTED,
 )

@@ -2,7 +2,7 @@ import { TOTP, Secret } from 'otpauth';
 import QRCode from 'qrcode';
 import { encryptSecret, decryptSecret } from './crypto';
 
-const ISSUER = 'CyberScore';
+const ISSUER = 'CyMetric';
 
 export interface TotpSetup {
   encryptedSecret: string; // store in users.totpSecret

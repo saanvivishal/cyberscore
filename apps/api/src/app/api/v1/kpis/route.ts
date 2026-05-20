@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import type { Level } from '@cyberscore/types';
+import type { Level } from '@cymetric/types';
 import { prisma } from '@/lib/prisma';
 import { redis } from '@/lib/redis';
 import { requireAuth } from '@/lib/require-auth';

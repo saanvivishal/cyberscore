@@ -15,8 +15,8 @@ import { Card } from '@/components/Card';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { api } from '@/lib/api';
 import { colors, scoreColorForValue } from '@/theme/colors';
-import type { ScorecardResponse, ScorecardSnapshot } from '@cyberscore/types';
-import { ScoreRange, SuggestionPriority } from '@cyberscore/types';
+import type { ScorecardResponse, ScorecardSnapshot } from '@cymetric/types';
+import { ScoreRange, SuggestionPriority } from '@cymetric/types';
 
 type ImprovementSuggestion = ScorecardResponse['improvementSuggestions'][number];
 

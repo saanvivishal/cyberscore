@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { OrgMode, Role, ScoreRange } from '@cyberscore/types';
+import { OrgMode, Role, ScoreRange } from '@cymetric/types';
 import { withTenant } from '@/lib/prisma';
 import { requireAuth } from '@/lib/require-auth';
 import { internalError } from '@/lib/problem';

@@ -8,7 +8,7 @@ import {
   JoinMode,
   emailDomainOf,
   isFreeEmailDomain,
-} from '@cyberscore/types';
+} from '@cymetric/types';
 import { hashPassword } from '@/lib/auth';
 import { checkPwnedPassword } from '@/lib/hibp';
 import { generateOtp, hashOtp, OTP_CONFIG } from '@/lib/otp';

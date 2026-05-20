@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ChangePasswordRequest, ErrorCodes } from '@cyberscore/types';
+import { ChangePasswordRequest, ErrorCodes } from '@cymetric/types';
 import { hashPassword, verifyPassword } from '@/lib/auth';
 import { checkPwnedPassword } from '@/lib/hibp';
 import { prisma, withBypassRls } from '@/lib/prisma';

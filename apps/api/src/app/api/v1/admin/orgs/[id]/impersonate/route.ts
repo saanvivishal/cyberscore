@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ErrorCodes, Role } from '@cyberscore/types';
+import { ErrorCodes, Role } from '@cymetric/types';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/require-admin';
 import { problem, internalError } from '@/lib/problem';

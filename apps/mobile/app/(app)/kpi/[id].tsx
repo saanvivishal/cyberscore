@@ -20,7 +20,7 @@ import { PressableGlow } from '@/components/PressableGlow';
 import { api } from '@/lib/api';
 import { frameworkLabel } from '@/lib/frameworks';
 import { colors } from '@/theme/colors';
-import type { Kpi, Level, TierCondition } from '@cyberscore/types';
+import type { Kpi, Level, TierCondition } from '@cymetric/types';
 
 // Per-KPI question screen — matches mock screenshot 2.
 // Routed as /(app)/kpi/[id]?level=PEOPLE&index=3
@@ -182,7 +182,7 @@ export default function KpiQuestion() {
               letterSpacing: 1,
             }}
           >
-            CyberScore
+            CyMetric
           </Text>
           <Pressable onPress={() => setInfoOpen(true)} hitSlop={10}>
             <Ionicons name="information-circle-outline" size={22} color={colors.brand[400]} />

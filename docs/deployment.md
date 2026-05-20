@@ -1,6 +1,6 @@
 # Deployment
 
-> **Status: LIVE in production as of 2026-05-18.** This document describes the **actual deployed setup** of CyberScore, not a plan. The API is running on Vercel, the database on Neon, Redis on Upstash, email via Brevo, and the Android APK is built and distributed through Expo EAS. Everything described here has been executed, verified, and used in the demo recording.
+> **Status: LIVE in production as of 2026-05-18.** This document describes the **actual deployed setup** of CyMetric, not a plan. The API is running on Vercel, the database on Neon, Redis on Upstash, email via Brevo, and the Android APK is built and distributed through Expo EAS. Everything described here has been executed, verified, and used in the demo recording.
 >
 > If the next batch deploys to a different stack, please update this document to reflect their changes instead of layering new options on top.
 
@@ -56,7 +56,7 @@ If you're cloning the repo and standing up your own deployment, follow these ste
 1. Sign up at https://www.brevo.com. Free tier (300 emails/day, no credit card).
 2. During signup, your email is automatically verified as a sender.
 3. Go to **Settings → SMTP & API → API Keys** (or directly: https://app.brevo.com/settings/keys/api).
-4. Click **Generate a new API key** → name it `cyberscore-vercel` → Generate.
+4. Click **Generate a new API key** → name it `cymetric-vercel` → Generate.
 5. Copy the key (starts with `xkeysib-...`). Brevo only shows it once.
 6. Save as `SMTP_PASS`.
 
@@ -69,18 +69,18 @@ SMTP_HOST=smtp.relay.brevo.com    # not used, but must be set
 SMTP_PORT=587                      # not used, but must be set
 SMTP_USER=resend                   # legacy, not used
 SMTP_PASS=xkeysib-your-key-here    # this is what matters
-SMTP_FROM=CyberScore <noreply@yourdomain.com>  # display name; Brevo rewrites the email part
+SMTP_FROM=CyMetric <noreply@yourdomain.com>  # display name; Brevo rewrites the email part
 ```
 
 ### Step 4, Vercel API deployment
 
 1. Push the repo to GitHub.
 2. Sign up at https://vercel.com with your GitHub account.
-3. **Add New → Project →** pick the `cyberscore` repo.
+3. **Add New → Project →** pick the `cymetric` repo.
 4. Configure:
    - **Framework Preset:** Next.js (auto-detected)
    - **Root Directory:** `apps/api`
-   - **Build Command:** leave default (`turbo run build --filter=@cyberscore/api` happens automatically via the workspaces setup)
+   - **Build Command:** leave default (`turbo run build --filter=@cymetric/api` happens automatically via the workspaces setup)
    - **Output Directory:** leave default (`.next`)
    - **Install Command:** leave default (`npm install`)
    - **Node version:** 22.x (set in root `package.json` `engines` field)
@@ -118,7 +118,7 @@ SMTP_HOST=smtp.relay.brevo.com
 SMTP_PORT=587
 SMTP_USER=resend
 SMTP_PASS=xkeysib-<your-brevo-api-key>
-SMTP_FROM=CyberScore <noreply@cyberscore.app>
+SMTP_FROM=CyMetric <noreply@cymetric.app>
 
 # --- AI advisor: local (free) vs Anthropic ---
 USE_LOCAL_ADVISOR=true
@@ -135,9 +135,9 @@ RATE_LIMIT_LOGIN_WINDOW_MS=900000
 # --- Optional: only if you've set up R2 / Sentry / Expo push ---
 # R2_ACCESS_KEY_ID=
 # R2_SECRET_ACCESS_KEY=
-# R2_BUCKET=cyberscore-evidence
+# R2_BUCKET=cymetric-evidence
 # R2_ENDPOINT=https://<accountid>.r2.cloudflarestorage.com
-# R2_PUBLIC_URL=https://evidence.cyberscore.app
+# R2_PUBLIC_URL=https://evidence.cymetric.app
 # EXPO_ACCESS_TOKEN=
 # SENTRY_DSN=
 ```
@@ -225,7 +225,7 @@ Vercel's Hobby tier shuts down idle serverless functions after ~5 minutes. The f
 1. Sign up at https://console.cron-job.org (free, no credit card).
 2. Click **CREATE CRONJOB**.
 3. Fill in:
-   - **Title:** `CyberScore keep-warm`
+   - **Title:** `CyMetric keep-warm`
    - **URL:** `https://cyberscore-api.vercel.app/api/v1/health`
    - **Schedule:** every 2 minutes (cron expression `*/2 * * * *`)
    - **HTTP method:** GET
@@ -246,7 +246,7 @@ export EXPO_TOKEN=<your-expo-token>    # for non-interactive / CI
 
 # First-time: link the project to your Expo account
 eas init
-# When asked "Would you like to create a project for @your-username/cyberscore?" → Y
+# When asked "Would you like to create a project for @your-username/cymetric?" → Y
 
 # Trigger an Android build using the 'preview' profile (defined in eas.json)
 eas build --platform android --profile preview
@@ -371,7 +371,7 @@ What's missing, leave for the next batch:
 
 The handover deployment runs on **$0/month** thanks to free tiers. For comparison, a real production stack at ~1000 active orgs would look like:
 
-> **These are list prices, not figures CyberScore has paid.** Use as order-of-magnitude only.
+> **These are list prices, not figures CyMetric has paid.** Use as order-of-magnitude only.
 
 | Service | Tier | List price |
 |---|---|---|
@@ -414,7 +414,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: cyberscore_test
+          POSTGRES_DB: cymetric_test
         ports: ['5432:5432']
         options: --health-cmd pg_isready
       redis:
@@ -431,7 +431,7 @@ jobs:
       - run: npx turbo run lint
       - run: npx turbo run test
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/cyberscore_test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/cymetric_test
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: ${{ secrets.CI_JWT_SECRET }}
           REFRESH_TOKEN_SECRET: ${{ secrets.CI_REFRESH_SECRET }}

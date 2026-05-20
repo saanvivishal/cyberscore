@@ -1,12 +1,12 @@
 # Contributing
 
-Welcome. This doc covers how to work on CyberScore: branching, commits, PRs, and the local dev expectations. For *what* the codebase looks like, read [docs/architecture.md](docs/architecture.md).
+Welcome. This doc covers how to work on CyMetric: branching, commits, PRs, and the local dev expectations. For *what* the codebase looks like, read [docs/architecture.md](docs/architecture.md).
 
 ## Setup (one time)
 
 ```bash
 git clone <repo-url>
-cd cyberscore
+cd cymetric
 ./scripts/setup.sh        # installs deps, copies .env, runs migrations and seed
 ```
 
@@ -25,17 +25,17 @@ In production we deploy only the API. There is no separate worker process runnin
 
 ```bash
 # Tab 1: API (Next.js dev server on port 3000)
-npm run dev --workspace @cyberscore/api
+npm run dev --workspace @cymetric/api
 
 # Tab 2: Mobile (Metro bundler plus Expo dev tools)
 EXPO_PUBLIC_API_URL=http://$(ipconfig getifaddr en0):3000 \
-  npm run start --workspace @cyberscore/mobile
+  npm run start --workspace @cymetric/mobile
 
 # Tab 3 (optional): BullMQ workers (email, snapshot, push, abandonment)
 # Email sending now happens inline through Brevo, so the worker is no
 # longer required for the auth flow. Run it only if you are testing
 # the snapshot or push or abandonment job paths.
-npm run worker --workspace @cyberscore/api
+npm run worker --workspace @cymetric/api
 ```
 
 If your LAN IP changes (different network, hotel Wi-Fi, etc.), restart Metro with the new `EXPO_PUBLIC_API_URL`. The iOS Simulator and the Android emulator both reach the host through that LAN IP.
@@ -149,7 +149,7 @@ We are not strict about formatting because Prettier handles it. But:
 - **No `any`.** If you need a fast escape hatch use `unknown` and narrow with a type guard. Strict mode will catch most cases anyway.
 - **Comments explain *why*, not *what*.** The code already says what. Comments should say why this approach. Do not waste lines explaining what `useMemo` does.
 - **Single export per route handler.** `export async function GET` etc. Do not colocate helper functions in route files. Move them to `lib/`.
-- **Server-only helpers in `lib/`, shared types in `packages/types`.** If the mobile app needs a shape, it goes in `@cyberscore/types` so both sides import the same source of truth.
+- **Server-only helpers in `lib/`, shared types in `packages/types`.** If the mobile app needs a shape, it goes in `@cymetric/types` so both sides import the same source of truth.
 
 ## Database changes
 
@@ -208,4 +208,4 @@ Stuck? Open a draft PR with what you have so far and ask in the description. Or 
 
 ## Acknowledgements
 
-CyberScore is a student project handed over from one IIIT Bangalore batch to the next. If you are picking it up: welcome. Read [docs/handover-notes.md](docs/handover-notes.md) and [docs/known-issues.md](docs/known-issues.md) before making changes. There is context in those files that is not obvious from the code alone.
+CyMetric is a student project handed over from one IIIT Bangalore batch to the next. If you are picking it up: welcome. Read [docs/handover-notes.md](docs/handover-notes.md) and [docs/known-issues.md](docs/known-issues.md) before making changes. There is context in those files that is not obvious from the code alone.

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { TotpVerifyRequest, ErrorCodes } from '@cyberscore/types';
+import { TotpVerifyRequest, ErrorCodes } from '@cymetric/types';
 import { verifyTotpCode } from '@/lib/totp';
 import { withTenant } from '@/lib/prisma';
 import { problem, parseJson, internalError } from '@/lib/problem';

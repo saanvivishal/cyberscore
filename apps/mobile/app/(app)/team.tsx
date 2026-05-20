@@ -14,7 +14,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { ApiError } from '@cyberscore/sdk';
+import { ApiError } from '@cymetric/sdk';
 import {
   ErrorCodes,
   Level,
@@ -23,7 +23,7 @@ import {
   Role,
   type CreateInviteResponse,
   type TeamMember,
-} from '@cyberscore/types';
+} from '@cymetric/types';
 
 const LEVEL_META: Array<{ key: Level; short: string; label: string }> = [
   { key: Level.PEOPLE, short: 'P', label: 'People' },
@@ -645,7 +645,7 @@ function InviteForm({
         Invite a teammate
       </Text>
       <Text style={{ color: colors.text.secondary, fontSize: 12, lineHeight: 17 }}>
-        We'll email them a link to set up their password and join your CyberScore workspace.
+        We'll email them a link to set up their password and join your CyMetric workspace.
       </Text>
       <Input
         label="Email"
@@ -787,7 +787,7 @@ function InviteCreatedView({
         icon="share-outline"
         onPress={() =>
           Share.share({
-            message: `Join our CyberScore workspace: ${invite.inviteUrl}`,
+            message: `Join our CyMetric workspace: ${invite.inviteUrl}`,
             url: invite.inviteUrl,
           }).catch(() => {})
         }

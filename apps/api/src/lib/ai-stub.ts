@@ -1,5 +1,5 @@
 import type { AggregatedScorecard } from './scorecard';
-import type { AiCompareResponse } from '@cyberscore/types';
+import type { AiCompareResponse } from '@cymetric/types';
 
 // Deterministic dev-mode stub for /ai/compare so the insights screen works
 // without burning Anthropic quota (or requiring a key at all).

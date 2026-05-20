@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PasswordResetConfirmRequest, ErrorCodes } from '@cyberscore/types';
+import { PasswordResetConfirmRequest, ErrorCodes } from '@cymetric/types';
 import { hashPassword } from '@/lib/auth';
 import { checkPwnedPassword } from '@/lib/hibp';
 import { verifyOtp, OTP_CONFIG } from '@/lib/otp';

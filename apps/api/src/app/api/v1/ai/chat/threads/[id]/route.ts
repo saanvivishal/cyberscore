@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ErrorCodes, RenameChatThreadRequest } from '@cyberscore/types';
+import { ErrorCodes, RenameChatThreadRequest } from '@cymetric/types';
 import { withTenant } from '@/lib/prisma';
 import { problem, parseJson, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';

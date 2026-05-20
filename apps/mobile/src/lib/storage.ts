@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import type { TokenPair, TokenStorage } from '@cyberscore/sdk';
+import type { TokenPair, TokenStorage } from '@cymetric/sdk';
 
 // expo-secure-store lives in the iOS Keychain and Android Keystore — both are
 // hardware-backed when available. We never put tokens in AsyncStorage / MMKV

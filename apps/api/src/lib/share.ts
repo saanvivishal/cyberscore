@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { prisma, withBypassRls } from './prisma';
 import { aggregate, loadScorecardInputs } from './scorecard';
-import type { ScoreRange } from '@cyberscore/types';
+import type { ScoreRange } from '@cymetric/types';
 
 // Shared token lookup + scorecard payload for public share URLs.
 // Called by the JSON API at /api/v1/share/public/:token AND the HTML

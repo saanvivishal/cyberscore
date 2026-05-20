@@ -23,11 +23,11 @@ You'll need:
 1. **Local dev environment** running:
    ```bash
  # Terminal 1, API
-   npm run dev --workspace @cyberscore/api
+   npm run dev --workspace @cymetric/api
    
  # Terminal 2, Mobile (Metro)
    EXPO_PUBLIC_API_URL=http://$(ipconfig getifaddr en0):3000 \
-     npm run start --workspace @cyberscore/mobile
+     npm run start --workspace @cymetric/mobile
    ```
    *(Skip the worker terminal, emails are inline now.)*
 
@@ -144,8 +144,8 @@ Comprehensive coverage of all major flows. Run before tagging a release.
 | F3 | Enter your real email | Form accepts |
 | F4 | Tap Submit | OTP screen appears |
 | F5 | **Check your real email inbox** | OTP email arrives within 30 sec (might be in Spam) |
-| F6 | Email sender shows "CyberScore" | Done |
-| F7 | Email subject: "Your CyberScore verification code" | Done |
+| F6 | Email sender shows "CyMetric" | Done |
+| F7 | Email subject: "Your CyMetric verification code" | Done |
 | F8 | Email body contains 6-digit code | Done |
 | F9 | Enter the OTP, tap Next | Set new password screen |
 | F10 | Enter new password (8+ chars, mixed) | Form accepts |
@@ -262,7 +262,7 @@ curl -s 'https://api.brevo.com/v3/smtp/emails?email=saanvi.vishal@iiitb.ac.in&li
   | python3 -m json.tool
 ```
 
-Should show recent sends from the API with `"subject": "Your CyberScore verification code"`.
+Should show recent sends from the API with `"subject": "Your CyMetric verification code"`.
 
 ---
 

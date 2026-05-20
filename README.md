@@ -1,4 +1,4 @@
-# CyberScore
+# CyMetric
 
 > Cybersecurity health scorecard for organisations — self-assess 46 KPIs across People, Process, and Company; get personalised AI-guided remediation.
 
@@ -50,7 +50,7 @@ The app is already built, deployed, and ready to install. You do not need to clo
 2. Tap **Install** on the Expo build page. A QR code and a direct **Download** button will appear.
 3. Either scan the QR code with the phone camera, or tap **Download** to grab the `.apk` file directly. The file is around 50 MB and takes a few seconds on Wi-Fi.
 4. When the download finishes, tap **Open** in the notification. Android will say something like "for your security your phone is not allowed to install unknown apps from this source." Tap **Settings**, switch **Allow from this source** on, hit back, then tap **Install**.
-5. Once the install finishes, tap **Open**. The CyberScore icon also appears in your app drawer.
+5. Once the install finishes, tap **Open**. The CyMetric icon also appears in your app drawer.
 
 ### Sign up and log in
 
@@ -92,13 +92,13 @@ Install Postgres + Redis on macOS:
 brew install postgresql@16 redis
 brew services start postgresql@16
 brew services start redis
-createdb cyberscore
+createdb cymetric
 ```
 
 ## Repository layout
 
 ```
-cyberscore/
+cymetric/
 ├── apps/
 │   ├── api/                      # Next.js 15 API
 │   │   ├── src/
@@ -125,8 +125,8 @@ cyberscore/
 │       └── eas.json              # preview (sideload APK) and production (Play Store AAB) build profiles
 │
 ├── packages/
-│   ├── sdk/                      # @cyberscore/sdk. Typed fetch client with auto-refresh on 401.
-│   └── types/                    # @cyberscore/types. Zod schemas shared by API and mobile.
+│   ├── sdk/                      # @cymetric/sdk. Typed fetch client with auto-refresh on 401.
+│   └── types/                    # @cymetric/types. Zod schemas shared by API and mobile.
 │
 ├── docs/
 │   ├── architecture.md           # System architecture and tech stack rationale
@@ -245,7 +245,7 @@ There's also `apps/mobile/HANDOFF.md` from the prior batch — useful design con
 | App says "Too many requests" on login | Rate limit kicked in after multiple failed attempts. Current limit is 30 login attempts per IP per 15 minutes. | Wait until the next 15-minute window starts. Or if you know what you are doing, clear the Redis key `rl:login:ip:<your-ip>:<bucket>` from Upstash console. |
 | Dashboard does not show the MANAGE button | The signed-in user's organisation is in SOLO mode. MANAGE only appears for ENTERPRISE admins. | If this is the demo user, run `apps/api/scripts/seed-demo-user.ts` against the production database to flip the mode to ENTERPRISE. Then log out and log back in on the phone. |
 | Every page transition feels slow (5 to 15 seconds) | Vercel serverless functions went idle and the first request pays a cold-start tax. | Check the cron-job.org dashboard to confirm the keep-warm job (every 2 minutes, hits `/api/v1/keepwarm`) is still firing green. If it is paused, restart it. If you do not have a cron set up, follow the steps in `docs/deployment.md`. |
-| `Network error: Could not reach the AI service` (local dev) | LAN IP on your Mac changed since Metro started. The mobile app on your phone is pointing at the old IP. | Restart Metro with the current LAN IP: `EXPO_PUBLIC_API_URL=http://$(ipconfig getifaddr en0):3000 npm run start --workspace @cyberscore/mobile` |
+| `Network error: Could not reach the AI service` (local dev) | LAN IP on your Mac changed since Metro started. The mobile app on your phone is pointing at the old IP. | Restart Metro with the current LAN IP: `EXPO_PUBLIC_API_URL=http://$(ipconfig getifaddr en0):3000 npm run start --workspace @cymetric/mobile` |
 | API returns 500 with "Objects are not valid as a React child" (local dev) | A route handler module threw at import time. Usually a Zod env validation failure from an invalid placeholder in `.env`. | Check the server logs from the same timestamp. Fix the env var that failed validation. Restart `npm run dev`. |
 | "Unable to resolve module react-native-sse" or similar after `npm install` | Metro's cache is stale and did not pick up the new package. | Restart Metro with `npx expo start --clear`. |
 | `npm run worker` exits with code 1 (local dev) | A placeholder env var in `.env` fails Zod URL validation. Common culprits are `R2_ENDPOINT=https://<accountid>...` and similar templates. | Open `.env`, comment out or fill in the offending variable, restart the worker. |
@@ -297,25 +297,25 @@ npm run db:seed      # Upsert the 46 KPIs, 212 tiers, and 92 suggestions into yo
 
 ```bash
 # API on http://localhost:3000
-npm run dev --workspace @cyberscore/api
+npm run dev --workspace @cymetric/api
 
 # BullMQ workers (email, snapshot, push, abandonment).
 # Optional for local dev because email now sends inline through Brevo.
-npm run worker --workspace @cyberscore/api
+npm run worker --workspace @cymetric/api
 
 # Metro bundler for the mobile app on http://localhost:8081
-npm run start --workspace @cyberscore/mobile
+npm run start --workspace @cymetric/mobile
 ```
 
 ### API extras
 
 ```bash
 # Prisma Studio: a web GUI to browse and edit the database. Opens on http://localhost:5555.
-npm run db:studio --workspace @cyberscore/api
+npm run db:studio --workspace @cymetric/api
 
 # Non-interactive migration runner. Use this against production databases like Neon.
 # DIRECT_DATABASE_URL must point at the target.
-npm run db:migrate:deploy --workspace @cyberscore/api
+npm run db:migrate:deploy --workspace @cymetric/api
 
 # Plant the demo user into any database whose URL you pass in.
 # Idempotent. Reads DEMO_EMAIL, DEMO_PASSWORD, DEMO_ORG_NAME, DEMO_INDUSTRY, DEMO_NAME from env if set.
@@ -329,13 +329,13 @@ cd apps/api && npx tsx scripts/set-dev-otp.ts <email>
 
 ```bash
 # Run on the iOS Simulator. Requires Xcode and a Mac.
-npm run ios --workspace @cyberscore/mobile
+npm run ios --workspace @cymetric/mobile
 
 # Run on a connected Android device or emulator. Requires Android SDK.
-npm run android --workspace @cyberscore/mobile
+npm run android --workspace @cymetric/mobile
 
 # Run in the browser (limited feature support, mostly useful for UI smoke tests).
-npm run web --workspace @cyberscore/mobile
+npm run web --workspace @cymetric/mobile
 ```
 
 ### Building the Android APK with EAS
@@ -361,7 +361,7 @@ MIT license. See the [LICENSE](LICENSE) file for the full text. Copyright is hel
 
 ## Acknowledgements
 
-CyberScore began as a student capstone project at IIIT Bangalore, mentored by Mohan Ram C of FISST. Subsequent batches: please read [docs/handover-notes.md](docs/handover-notes.md) and [docs/known-issues.md](docs/known-issues.md) before making changes. They document context that is not obvious from the code alone.
+CyMetric began as a student capstone project at IIIT Bangalore, mentored by Mohan Ram C of FISST. Subsequent batches: please read [docs/handover-notes.md](docs/handover-notes.md) and [docs/known-issues.md](docs/known-issues.md) before making changes. They document context that is not obvious from the code alone.
 
 ---
 

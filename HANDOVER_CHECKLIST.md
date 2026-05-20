@@ -1,6 +1,6 @@
 # Handover Checklist
 
-This document maps the 20 sections maps to the actual state of the CyberScore project. Every section gives a one-word status, a short summary of what was done in that area, and a link to the deeper documentation file when there is one.
+This document maps the 20 sections maps to the actual state of the CyMetric project. Every section gives a one-word status, a short summary of what was done in that area, and a link to the deeper documentation file when there is one.
 
 **Status words used in this document:**
 - Done: shipped and verified.
@@ -15,7 +15,7 @@ This document maps the 20 sections maps to the actual state of the CyberScore pr
 
 ## Snapshot at handover
 
-CyberScore is fully deployed end to end. The mobile APK runs standalone on Android and talks to the live API hosted on Vercel (Singapore region). The database is on Neon Postgres (Singapore). The cache and rate-limit store is on Upstash Redis (Singapore). Password reset, signup verification, and team invitation emails all arrive in real inboxes through Brevo's HTTP email API. A free `cron-job.org` job pings `/api/v1/keepwarm` every two minutes to keep the Vercel functions and the Neon database warm.
+CyMetric is fully deployed end to end. The mobile APK runs standalone on Android and talks to the live API hosted on Vercel (Singapore region). The database is on Neon Postgres (Singapore). The cache and rate-limit store is on Upstash Redis (Singapore). Password reset, signup verification, and team invitation emails all arrive in real inboxes through Brevo's HTTP email API. A free `cron-job.org` job pings `/api/v1/keepwarm` every two minutes to keep the Vercel functions and the Neon database warm.
 
 For the supervisor:
 
@@ -33,11 +33,11 @@ What was built over five weeks: an authenticated mobile-first SaaS that lets a c
 
 Status: Done.
 
-The project is a mobile-first SaaS named CyberScore. It lets an organisation self-assess its cybersecurity posture across 46 KPIs grouped under three levels (People, Process, Company), get a live numeric scorecard mapped to NIST CSF 2.0 and ISO 27001 control families, and receive personalised remediation advice from a built-in AI advisor. There are two operating modes. SOLO is for an individual user (a founder, an IT lead) doing a self-assessment alone. ENTERPRISE is for a company admin who invites employees by email and assigns each one a subset of the three assessment levels.
+The project is a mobile-first SaaS named CyMetric. It lets an organisation self-assess its cybersecurity posture across 46 KPIs grouped under three levels (People, Process, Company), get a live numeric scorecard mapped to NIST CSF 2.0 and ISO 27001 control families, and receive personalised remediation advice from a built-in AI advisor. There are two operating modes. SOLO is for an individual user (a founder, an IT lead) doing a self-assessment alone. ENTERPRISE is for a company admin who invites employees by email and assigns each one a subset of the three assessment levels.
 
 | Field | Value |
 |---|---|
-| Project title | CyberScore: Cybersecurity Health Scorecard SaaS |
+| Project title | CyMetric: Cybersecurity Health Scorecard SaaS |
 | Team members | Saanvi Vishal (IIIT Bangalore, IMT2021043). Sole developer this batch. |
 | Mentor | Mohan Ram C, FISST (Foundation for Innovation in Security and Software Technology) |
 | Project duration | 2026-04-15 to 2026-05-19 (about five weeks) |
@@ -315,7 +315,7 @@ Status: Documented. Not yet transferred.
 | Service | What it does | Owner | URL |
 |---|---|---|---|
 | GitHub | Source repository | Saanvi Vishal (`saanvivishal@gmail.com`) | https://github.com/saanvivishal/cyberscore |
-| Vercel | Hosts the API | Saanvi Vishal (Hobby tier, free) | https://vercel.com/saanvivishals-projects/cyberscore-api |
+| Vercel | Hosts the API | Saanvi Vishal (Hobby tier, free) | https://vercel.com/saanvivishals-projects/cymetric-api |
 | Neon | Production Postgres in Singapore | Saanvi Vishal (Free tier) | https://console.neon.tech |
 | Upstash | Production Redis in Singapore | Saanvi Vishal (Free tier) | https://console.upstash.com |
 | Brevo | Transactional email, 300 per day on free tier | Saanvi Vishal, registered as "iiit bangalore" | https://app.brevo.com |
@@ -488,4 +488,4 @@ Still pending:
 
 ---
 
-CyberScore is handover-ready as of 2026-05-19. The project is fully deployed, demoable, and documented. A new developer can clone the repository, run `scripts/setup.sh`, and have a working local development environment in under ten minutes. The supervisor and FISST can also try the deployed app directly by installing the APK from the EAS link, without cloning anything.
+CyMetric is handover-ready as of 2026-05-19. The project is fully deployed, demoable, and documented. A new developer can clone the repository, run `scripts/setup.sh`, and have a working local development environment in under ten minutes. The supervisor and FISST can also try the deployed app directly by installing the APK from the EAS link, without cloning anything.

@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { Framework, InputType, Level } from '@prisma/client';
-import type { ScoreRange, SuggestionPriority } from '@cyberscore/types';
+import type { ScoreRange, SuggestionPriority } from '@cymetric/types';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/require-admin';
 import { problem, internalError } from '@/lib/problem';
-import { ErrorCodes } from '@cyberscore/types';
+import { ErrorCodes } from '@cymetric/types';
 import { logger } from '@/lib/logger';
 import {
   SUGGESTIONS_BY_KPI,

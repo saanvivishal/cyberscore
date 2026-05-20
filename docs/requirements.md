@@ -2,7 +2,7 @@
 
 ## 1. Product summary
 
-**CyberScore** is a mobile-first SaaS that lets organisations self-assess cybersecurity posture across 46 KPIs spanning three dimensions, **People**, **Process**, and **Company**: and surfaces an AI advisor for personalised remediation.
+**CyMetric** is a mobile-first SaaS that lets organisations self-assess cybersecurity posture across 46 KPIs spanning three dimensions, **People**, **Process**, and **Company**: and surfaces an AI advisor for personalised remediation.
 
 The product targets two operating modes:
 - **SOLO**: single-user org for small teams (4 to 5 people)
@@ -174,7 +174,7 @@ Within ENTERPRISE, the admin sets each employee's `allowedLevels Level[]` (any s
 | ID | Requirement |
 |---|---|
 | NFR-MAINT-1 | Strict TypeScript across the entire codebase. `noUnusedLocals`, `noUnusedParameters`, `noImplicitReturns`, `noUncheckedIndexedAccess` all on |
-| NFR-MAINT-2 | Single source of truth for request/response shapes via Zod schemas in `@cyberscore/types`. Mobile and API import the same definitions |
+| NFR-MAINT-2 | Single source of truth for request/response shapes via Zod schemas in `@cymetric/types`. Mobile and API import the same definitions |
 | NFR-MAINT-3 | RFC 7807 Problem Details for every error response; consistent error codes in `ErrorCodes` enum |
 | NFR-MAINT-4 | Append-only migration history. Never edit a past migration, always create a new one |
 

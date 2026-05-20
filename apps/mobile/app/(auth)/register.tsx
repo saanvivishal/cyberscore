@@ -2,14 +2,14 @@ import { useMemo, useState } from 'react';
 import { View, Text, Pressable, Platform, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { ApiError } from '@cyberscore/sdk';
+import { ApiError } from '@cymetric/sdk';
 import {
   ErrorCodes,
   RegisterMode,
   emailDomainOf,
   isFreeEmailDomain,
   type RegisterMode as RegisterModeType,
-} from '@cyberscore/types';
+} from '@cymetric/types';
 import { Screen } from '@/components/Screen';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
@@ -202,7 +202,7 @@ export default function Register() {
                 letterSpacing: 1,
               }}
             >
-              CYBERSCORE
+              CYMETRIC
             </Text>
             <Text style={{ color: colors.text.secondary, marginTop: 6, fontSize: 14 }}>
               Initialize your secure profile

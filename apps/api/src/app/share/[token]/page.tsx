@@ -34,7 +34,7 @@ export default async function SharePage({
     <main style={styles.page}>
       <div style={styles.card}>
         <header style={styles.header}>
-          <div style={styles.brand}>CyberScore</div>
+          <div style={styles.brand}>CyMetric</div>
           <div style={styles.shared}>Shared Scorecard</div>
         </header>
 

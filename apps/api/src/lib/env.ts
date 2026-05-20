@@ -28,7 +28,7 @@ const envSchema = z.object({
 
   R2_ACCESS_KEY_ID: z.string().optional(),
   R2_SECRET_ACCESS_KEY: z.string().optional(),
-  R2_BUCKET: z.string().default('cyberscore-evidence'),
+  R2_BUCKET: z.string().default('cymetric-evidence'),
   R2_ENDPOINT: z.string().url().optional(),
   R2_PUBLIC_URL: z.string().url().optional(),
 
@@ -36,7 +36,7 @@ const envSchema = z.object({
   SMTP_PORT: z.coerce.number().int().default(587),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
-  SMTP_FROM: z.string().default('CyberScore <no-reply@cyberscore.app>'),
+  SMTP_FROM: z.string().default('CyMetric <no-reply@cymetric.app>'),
 
   EXPO_ACCESS_TOKEN: z.string().optional(),
 

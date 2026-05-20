@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Level, OrgMode, Role } from '@cyberscore/types';
+import { Level, OrgMode, Role } from '@cymetric/types';
 import { Screen } from '@/components/Screen';
 import { TopBar } from '@/components/TopBar';
 import { ScoreRing } from '@/components/ScoreRing';

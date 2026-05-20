@@ -1,5 +1,5 @@
 import type { Prisma } from '@prisma/client';
-import { AnswerScope, Level, OrgMode, Role, ScoreRange, scoreRangeFor } from '@cyberscore/types';
+import { AnswerScope, Level, OrgMode, Role, ScoreRange, scoreRangeFor } from '@cymetric/types';
 
 // Score aggregation — the single source of truth for every scorecard number
 // the API returns. Keep this pure; it takes the raw KPI catalogue + response

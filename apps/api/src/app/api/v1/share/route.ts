@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
-import { CreateShareRequest } from '@cyberscore/types';
+import { CreateShareRequest } from '@cymetric/types';
 import { withTenant } from '@/lib/prisma';
 import { requireAuth } from '@/lib/require-auth';
 import { parseJson, internalError } from '@/lib/problem';

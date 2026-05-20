@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to CyberScore are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+All notable changes to CyMetric are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.3.1] (2026-05-19)
 
@@ -21,7 +21,7 @@ Polish and live-fix pass made after the 0.3.0 demo recording. These are the chan
 
 ## [0.3.0] (2026-05-18)
 
-**Production-ready release.** CyberScore is now fully deployed and demoable. The API runs on Vercel, Postgres on Neon (Singapore), Redis on Upstash (Singapore), email through Brevo's HTTP API. The Android APK is built via EAS and installs standalone on real Android phones. It connects to the live API and performs the full assessment, AI chat, and password-reset flow end to end.
+**Production-ready release.** CyMetric is now fully deployed and demoable. The API runs on Vercel, Postgres on Neon (Singapore), Redis on Upstash (Singapore), email through Brevo's HTTP API. The Android APK is built via EAS and installs standalone on real Android phones. It connects to the live API and performs the full assessment, AI chat, and password-reset flow end to end.
 
 ### Added
 - **Live production deployment** at https://cyberscore-api.vercel.app. Free tiers across the stack, zero rupees per month total cost.
@@ -143,8 +143,8 @@ Initial documented release. Covers everything that existed in the repo at the st
 
 ### Shared packages
 
-- `@cyberscore/types`. Zod schemas and TypeScript types for auth, KPI, scorecard, AI, team, and errors.
-- `@cyberscore/sdk`. The `CyberScoreClient` with transparent 401 refresh, abortable fetch, and typed error mapping.
+- `@cymetric/types`. Zod schemas and TypeScript types for auth, KPI, scorecard, AI, team, and errors.
+- `@cymetric/sdk`. The `CyMetricClient` with transparent 401 refresh, abortable fetch, and typed error mapping.
 
 ### Infrastructure
 

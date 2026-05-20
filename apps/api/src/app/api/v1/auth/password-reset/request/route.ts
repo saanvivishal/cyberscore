@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PasswordResetRequestRequest, ErrorCodes } from '@cyberscore/types';
+import { PasswordResetRequestRequest, ErrorCodes } from '@cymetric/types';
 import { generateOtp, hashOtp, OTP_CONFIG } from '@/lib/otp';
 import { withBypassRls } from '@/lib/prisma';
 import { problem, parseJson, internalError } from '@/lib/problem';

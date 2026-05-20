@@ -1,5 +1,5 @@
 {
-  "name": "@cyberscore/sdk",
+  "name": "@cymetric/sdk",
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",
@@ -12,7 +12,7 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@cyberscore/types": "*",
+    "@cymetric/types": "*",
     "zod": "^3.24.1"
   },
   "devDependencies": {

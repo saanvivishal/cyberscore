@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { VerifyOtpRequest, ErrorCodes } from '@cyberscore/types';
+import { VerifyOtpRequest, ErrorCodes } from '@cymetric/types';
 import { verifyOtp, OTP_CONFIG } from '@/lib/otp';
 import { withBypassRls } from '@/lib/prisma';
 import { problem, parseJson, internalError } from '@/lib/problem';

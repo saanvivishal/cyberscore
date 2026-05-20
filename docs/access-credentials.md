@@ -1,6 +1,6 @@
 # Access & Credentials
 
-How every external service CyberScore uses is set up, where the secrets live, and how to transfer control to the next batch.
+How every external service CyMetric uses is set up, where the secrets live, and how to transfer control to the next batch.
 
 > **Rule:** No actual secret values are written in this file or anywhere else in the repo. Secrets live in two places only: (1) Vercel Project Settings → Environment Variables, and (2) `apps/api/.env` on Saanvi's local machine (gitignored). Everything else is the *name* of the secret and *where to find it*, never the value.
 
@@ -8,12 +8,12 @@ How every external service CyberScore uses is set up, where the secrets live, an
 
 ## Service inventory
 
-Every external service CyberScore depends on at handover, with login URL, free-tier status, and what's stored there.
+Every external service CyMetric depends on at handover, with login URL, free-tier status, and what's stored there.
 
 | # | Service | Purpose | Account owner | URL | Free tier? |
 |---|---|---|---|---|---|
 | 1 | GitHub | Source code | `saanvivishal@gmail.com` (`@saanvivishal`) | https://github.com/saanvivishal/cyberscore | Free |
-| 2 | Vercel | API hosting | `saanvivishal@gmail.com` | https://vercel.com/saanvivishals-projects/cyberscore-api | Hobby (free) |
+| 2 | Vercel | API hosting | `saanvivishal@gmail.com` | https://vercel.com/saanvivishals-projects/cymetric-api | Hobby (free) |
 | 3 | Neon | Production Postgres | `saanvivishal@gmail.com` | https://console.neon.tech | Free (3 GB storage) |
 | 4 | Upstash | Production Redis | `saanvivishal@gmail.com` | https://console.upstash.com | Free (10k commands/day) |
 | 5 | Brevo | Transactional email | `saanvivishal@gmail.com` | https://app.brevo.com | Free (300 emails/day) |
@@ -46,7 +46,7 @@ The Vercel console (Project → Settings → Environment Variables) is the singl
 | `SMTP_HOST` | No | `smtp.relay.brevo.com` (legacy, not used by HTTP path) | Static |
 | `SMTP_PORT` | No | `587` (legacy, not used by HTTP path) | Static |
 | `SMTP_USER` | No | `resend` (legacy, not used) | Static |
-| `SMTP_FROM` | No | `CyberScore <noreply@cyberscore.app>`, display name; Brevo rewrites the email part | Static |
+| `SMTP_FROM` | No | `CyMetric <noreply@cymetric.app>`, display name; Brevo rewrites the email part | Static |
 | `USE_LOCAL_ADVISOR` | No | `true` (default), flip to `false` to use Anthropic | Static |
 | `NODE_ENV` | No | `production` | Static |
 | `RATE_LIMIT_LOGIN_MAX` | No | `5` | Static |
@@ -92,7 +92,7 @@ The `EXPO_PUBLIC_` prefix is required by Expo to inline the value into the JS bu
 - **Account email:** `saanvivishal@gmail.com`
 - **Plan:** Hobby (free)
 - **Team:** `saanvivishals-projects` (auto-created on signup)
-- **Project:** `cyberscore-api`
+- **Project:** `cymetric-api`
 - **Production domain:** `cyberscore-api.vercel.app`
 - **Auto-deploy:** every push to `main` triggers a build. Settings → Git → "Production Branch" = `main`.
 - **Build settings:**
@@ -107,7 +107,7 @@ The `EXPO_PUBLIC_` prefix is required by Expo to inline the value into the JS bu
 - **Account email:** `saanvivishal@gmail.com`
 - **Plan:** Free
 - **Region:** Singapore (`ap-southeast-1`), chosen for low latency to Indian users
-- **Project:** `cyberscore` (default branch `main`)
+- **Project:** `cymetric` (default branch `main`)
 - **Database:** `neondb`
 - **Owner role:** `neondb_owner`
 - **Migrations:** 7 migrations applied, see `apps/api/prisma/migrations/`
@@ -126,7 +126,7 @@ DIRECT_DATABASE_URL='postgresql://...neon.tech/neondb?sslmode=require' \
 - **Account email:** `saanvivishal@gmail.com`
 - **Plan:** Free
 - **Region:** Singapore (`ap-southeast-1`)
-- **Database name:** `cyberscore-redis` (or similar, check console)
+- **Database name:** `cymetric-redis` (or similar, check console)
 - **Eviction policy:** `noeviction`
 - **TLS:** enforced (connection string starts with `rediss://`)
 - **What's stored:**
@@ -144,22 +144,22 @@ DIRECT_DATABASE_URL='postgresql://...neon.tech/neondb?sslmode=require' \
 
 **Critical detail about the "From" address:**
 
-Even though we configure `SMTP_FROM='CyberScore <saanvivishal@gmail.com>'` in Vercel, Brevo **rewrites the envelope From** to its own relay domain when the sender isn't a verified custom domain. So the actual `From` header that recipients see is:
+Even though we configure `SMTP_FROM='CyMetric <saanvivishal@gmail.com>'` in Vercel, Brevo **rewrites the envelope From** to its own relay domain when the sender isn't a verified custom domain. So the actual `From` header that recipients see is:
 
 ```
-CyberScore <saanvivishal@11248643.brevosend.com>
+CyMetric <saanvivishal@11248643.brevosend.com>
 ```
 
-The display name "CyberScore" is preserved. The personal gmail address never appears in outbound mail. Recipients see "CyberScore" in their inbox preview; only the technical metadata shows the relay address.
+The display name "CyMetric" is preserved. The personal gmail address never appears in outbound mail. Recipients see "CyMetric" in their inbox preview; only the technical metadata shows the relay address.
 
-If you want to remove the personal name from the relay domain too: in Brevo console → Settings → Senders, domains, IPs → add a new sender with a different local-part (e.g. `noreply@cyberscore.app`). Brevo sends a verification email to that address; once verified, the relay rewrites to `noreply@...brevosend.com`. Cleaner for production.
+If you want to remove the personal name from the relay domain too: in Brevo console → Settings → Senders, domains, IPs → add a new sender with a different local-part (e.g. `noreply@cymetric.app`). Brevo sends a verification email to that address; once verified, the relay rewrites to `noreply@...brevosend.com`. Cleaner for production.
 
 ### 6. Expo / EAS
 
 - **Username:** `saanviiiiiiiiiiiiii` (signed up via GitHub OAuth)
 - **Email:** `saanvivishal@gmail.com`
 - **Plan:** Free
-- **Project:** `cyberscore` (ID: `4cddb02b-7be0-47d3-8911-4df45863d418`, in `apps/mobile/app.json`)
+- **Project:** `cymetric` (ID: `4cddb02b-7be0-47d3-8911-4df45863d418`, in `apps/mobile/app.json`)
 - **Auth from CLI:**
   - Interactive: `eas login` (prompts for username + password, but OAuth accounts don't have a password, set one via Settings, or use the token approach)
   - Non-interactive: `export EXPO_TOKEN=<token>` then any `eas` command works
@@ -174,7 +174,7 @@ If you want to remove the personal name from the relay domain too: in Brevo cons
 - **Account email:** `saanvivishal@gmail.com`
 - **Plan:** Free
 - **Single job:**
-  - Title: `CyberScore keep-warm`
+  - Title: `CyMetric keep-warm`
   - URL: `https://cyberscore-api.vercel.app/api/v1/health`
   - Method: GET
   - Schedule: every 2 minutes (`*/2 * * * *`)

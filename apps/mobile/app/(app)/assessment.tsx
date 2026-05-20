@@ -11,7 +11,7 @@ import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/auth';
 import { frameworkLabel } from '@/lib/frameworks';
 import { colors, scoreColorForValue } from '@/theme/colors';
-import { OrgMode, Role, type Level } from '@cyberscore/types';
+import { OrgMode, Role, type Level } from '@cymetric/types';
 
 // Level picker — three tiles that fan into the per-KPI question screen.
 // We need two queries:

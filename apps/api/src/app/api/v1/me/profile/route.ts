@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { Framework } from '@prisma/client';
-import { ErrorCodes, OrgMode, Role } from '@cyberscore/types';
+import { ErrorCodes, OrgMode, Role } from '@cymetric/types';
 import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/require-auth';
 import { parseJson, problem, internalError } from '@/lib/problem';

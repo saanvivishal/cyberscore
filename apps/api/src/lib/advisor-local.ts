@@ -1,4 +1,4 @@
-import { Level, ScoreRange } from '@cyberscore/types';
+import { Level, ScoreRange } from '@cymetric/types';
 import type { AggregatedScorecard } from './scorecard';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -536,7 +536,7 @@ function answerSectorRegulations(ctx: AdvisorContext): string {
     ``,
     bulletList(sector.regulations),
     ``,
-    `Note that CyberScore's KPI catalogue is mapped to NIST CSF 2.0 and ISO 27001 control families — pick the framework lens that matches your compliance reporting in your profile.`,
+    `Note that CyMetric's KPI catalogue is mapped to NIST CSF 2.0 and ISO 27001 control families — pick the framework lens that matches your compliance reporting in your profile.`,
   ].join('\n');
 }
 
@@ -567,7 +567,7 @@ function answerCompleteness(ctx: AdvisorContext): string {
 function answerGreeting(ctx: AdvisorContext): string {
   const s = ctx.scorecard;
   return [
-    `Hello. I'm your CyberScore advisor.`,
+    `Hello. I'm your CyMetric advisor.`,
     ``,
     `You're sitting at ${pct(s.overallScore)} overall (${bandLabel(s.colorBand)}) with ${pct(s.completeness)} of the assessment complete.`,
     ``,

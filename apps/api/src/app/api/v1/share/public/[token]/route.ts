@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ErrorCodes } from '@cyberscore/types';
+import { ErrorCodes } from '@cymetric/types';
 import { problem, internalError } from '@/lib/problem';
 import { resolvePublicShare } from '@/lib/share';
 

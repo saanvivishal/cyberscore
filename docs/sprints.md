@@ -1,6 +1,6 @@
 # Sprint Documentation
 
-A week-by-week record of how CyberScore was built. Five sprints, one developer (Saanvi Vishal), ~5 weeks of active work from 2026-04-15 to 2026-05-18.
+A week-by-week record of how CyMetric was built. Five sprints, one developer (Saanvi Vishal), ~5 weeks of active work from 2026-04-15 to 2026-05-18.
 
 > **Note on style:** This wasn't run as a formal Scrum / Jira project. There was no daily standup, no story-point estimation, no separate Product Owner. The "sprints" below are retrospective groupings, they describe what was actually built each week, what slipped, and what was learned. This is the record I'd want to read if I were the next person picking up the codebase.
 
@@ -22,11 +22,11 @@ Get a monorepo running locally with an API server, a mobile app, a shared Zod sc
 - **Email-OTP register flow**. POST `/api/v1/auth/register` → creates Organisation + User → emits OTP → POST `/api/v1/auth/verify-otp` → marks org `isVerified=true`.
 - **Login**. POST `/api/v1/auth/login` issues a JWT + refresh-token pair. The `passwordHash` lives on Organisation (not User) because the User table represents employees within an org.
 - **Expo SDK 52 mobile shell**: base scaffold, expo-router, glassmorphism design system (BlurView cards, brand blue #3b82f6, dark theme), the onboarding carousel, login + register + verify-OTP screens.
-- **`@cyberscore/types` package**. Zod schemas for the auth payloads, shared between API (for validation) and mobile (for typed requests + responses).
+- **`@cymetric/types` package**. Zod schemas for the auth payloads, shared between API (for validation) and mobile (for typed requests + responses).
 
 ### What slipped
 
-- The `@cyberscore/sdk` package was planned for Week 1 but pushed to Week 2, wanted to first see what shape the API was settling into before extracting the client.
+- The `@cymetric/sdk` package was planned for Week 1 but pushed to Week 2, wanted to first see what shape the API was settling into before extracting the client.
 - The KPI catalogue extraction was started but not finished. The XLSX (`SCORE CARD_KPI_CYBER SEC_PPT_V0.9.xlsx`) needed a Python script to parse, chose to skip rather than ad-hoc parse.
 
 ### What worked
@@ -47,7 +47,7 @@ Get a monorepo running locally with an API server, a mobile app, a shared Zod sc
 
 ### Goal
 
-Make CyberScore a *scorecard* product, not just a login screen. Get the 46 KPIs into the database, write the scoring algorithm, and surface a numeric score in the mobile UI.
+Make CyMetric a *scorecard* product, not just a login screen. Get the 46 KPIs into the database, write the scoring algorithm, and surface a numeric score in the mobile UI.
 
 ### What got built
 
@@ -64,7 +64,7 @@ Make CyberScore a *scorecard* product, not just a login screen. Get the 46 KPIs 
 - **Mobile Dashboard screen**: score ring component (animated SVG), per-level tiles, last-snapshot date, "Resume assessment" CTA.
 - **Mobile Assessment screen**: picks a level (PEOPLE / PROCESS / COMPANY), routes to KPI questions in order.
 - **Mobile KPI question screen (`app/(app)/kpi/[id].tsx`)**: handles both multi-choice tier selection (radio buttons styled as cards) and percentage input (numeric keypad). Submit → save response → save progress → navigate to next question.
-- **`@cyberscore/sdk`**: typed fetch client with auto-refresh: every request first tries the access token; on 401 it transparently calls `/auth/refresh`, retries the original request, then re-throws if refresh also fails (signal: `onAuthFailure` callback).
+- **`@cymetric/sdk`**: typed fetch client with auto-refresh: every request first tries the access token; on 401 it transparently calls `/auth/refresh`, retries the original request, then re-throws if refresh also fails (signal: `onAuthFailure` callback).
 
 ### What slipped
 
@@ -213,7 +213,7 @@ Take the project from "works on my Mac" to "runs standalone on the supervisor's 
 
 - **Free tier everywhere**. Vercel + Neon + Upstash + Brevo + cron-job.org + EAS all have generous free tiers. Total cost: $0. Important because the project doesn't have a budget.
 - **External cron for keep-warm** instead of upgrading Vercel to Pro. Saves $20/month + works identically.
-- **Brevo's HTTP API**: fast, reliable, no DMARC issues because Brevo rewrites the From envelope to its own relay domain. The display name "CyberScore" is preserved, the personal gmail address never appears in outbound mail.
+- **Brevo's HTTP API**: fast, reliable, no DMARC issues because Brevo rewrites the From envelope to its own relay domain. The display name "CyMetric" is preserved, the personal gmail address never appears in outbound mail.
 - **EAS Build's non-interactive mode**: `eas build --non-interactive --no-wait` lets you trigger a build from CLI without prompts. Combined with `EXPO_TOKEN` env var for auth, you can run it from any script.
 
 ### What didn't

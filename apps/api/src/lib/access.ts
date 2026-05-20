@@ -1,4 +1,4 @@
-import { Level, OrgMode, Role } from '@cyberscore/types';
+import { Level, OrgMode, Role } from '@cymetric/types';
 
 const ALL_LEVELS: Level[] = [Level.PEOPLE, Level.PROCESS, Level.COMPANY];
 

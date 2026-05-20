@@ -1,6 +1,6 @@
 # Architecture
 
-CyberScore is a **multi-tenant SaaS** for organisations to self-assess cybersecurity posture across 46 KPIs and get AI-guided remediation.
+CyMetric is a **multi-tenant SaaS** for organisations to self-assess cybersecurity posture across 46 KPIs and get AI-guided remediation.
 
 ## Architecture pattern
 
@@ -12,7 +12,7 @@ This is deliberate. At the project's scale (single org → small enterprise team
 flowchart LR
   subgraph Client["Mobile client (Expo SDK 52, iOS + Android)"]
     M[React Native UI]
-    SDK[CyberScore SDK<br/>fetch + SecureStore]
+    SDK[CyMetric SDK<br/>fetch + SecureStore]
     M --> SDK
   end
 
@@ -72,7 +72,7 @@ flowchart LR
 | Auth | JWT (15min) + opaque refresh tokens (7d, bcrypt-hashed at rest) |
 | Passwords | Argon2id (OWASP-recommended params) + HIBP breach check on register |
 | 2FA | TOTP (RFC 6238), secret AES-GCM encrypted at rest |
-| Validation | Zod schemas shared with mobile via `@cyberscore/types` |
+| Validation | Zod schemas shared with mobile via `@cymetric/types` |
 | Logging | Pino (structured JSON in prod, pretty in dev) |
 | Errors | RFC 7807 Problem Details |
 
@@ -91,8 +91,8 @@ Four BullMQ workers + a scheduler, run as one separate `tsx` process via `npm ru
 
 | | |
 |---|---|
-| `@cyberscore/types` | Zod schemas + TS types. Source of truth for request/response shapes shared between API and mobile. |
-| `@cyberscore/sdk` | `CyberScoreClient` class wrapping `fetch`. Transparent 401 refresh, abort support, error mapping to `ApiError`. |
+| `@cymetric/types` | Zod schemas + TS types. Source of truth for request/response shapes shared between API and mobile. |
+| `@cymetric/sdk` | `CyMetricClient` class wrapping `fetch`. Transparent 401 refresh, abort support, error mapping to `ApiError`. |
 
 ## Data flow, a representative request
 

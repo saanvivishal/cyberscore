@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Role, ErrorCodes } from '@cyberscore/types';
+import { Role, ErrorCodes } from '@cymetric/types';
 import { hashPassword } from '@/lib/auth';
 import { randomToken } from '@/lib/crypto';
 import { prisma, withTenant } from '@/lib/prisma';

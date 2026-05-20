@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ProgressStatus, type Level } from '@cyberscore/types';
+import { ProgressStatus, type Level } from '@cymetric/types';
 import { withTenant } from '@/lib/prisma';
 import { requireAuth } from '@/lib/require-auth';
 import { internalError } from '@/lib/problem';

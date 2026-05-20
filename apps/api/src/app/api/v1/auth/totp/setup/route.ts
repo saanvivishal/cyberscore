@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ErrorCodes } from '@cyberscore/types';
+import { ErrorCodes } from '@cymetric/types';
 import { generateTotpSetup } from '@/lib/totp';
 import { withTenant } from '@/lib/prisma';
 import { problem, internalError } from '@/lib/problem';

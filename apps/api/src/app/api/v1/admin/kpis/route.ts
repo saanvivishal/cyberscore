@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { Framework, InputType, Level, TierCondition } from '@cyberscore/types';
+import { Framework, InputType, Level, TierCondition } from '@cymetric/types';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@/lib/require-admin';
 import { parseJson, internalError } from '@/lib/problem';

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { MarkNaRequest, ErrorCodes } from '@cyberscore/types';
+import { MarkNaRequest, ErrorCodes } from '@cymetric/types';
 import { prisma, withTenant } from '@/lib/prisma';
 import { parseJson, problem, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';

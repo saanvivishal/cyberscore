@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
-import { LogoutRequest } from '@cyberscore/types';
+import { LogoutRequest } from '@cymetric/types';
 import { withBypassRls } from '@/lib/prisma';
 import { parseJson, internalError } from '@/lib/problem';
 import { audit, AuditActions } from '@/lib/audit';

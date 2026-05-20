@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-import { ChatRole, type ChatMessage, type ChatThread } from '@cyberscore/types';
+import { ChatRole, type ChatMessage, type ChatThread } from '@cymetric/types';
 import { Screen } from '@/components/Screen';
 import { TopBar } from '@/components/TopBar';
 import { api } from '@/lib/api';
@@ -280,7 +280,7 @@ function ThreadBar({
           {activeThread?.title ?? 'New chat'}
         </Text>
         <Text style={{ color: colors.text.muted, fontSize: 11, marginTop: 1 }}>
-          CyberScore Advisor
+          CyMetric Advisor
         </Text>
       </View>
       <Pressable

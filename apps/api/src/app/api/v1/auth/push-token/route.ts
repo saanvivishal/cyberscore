@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PushTokenRequest } from '@cyberscore/types';
+import { PushTokenRequest } from '@cymetric/types';
 import { withTenant } from '@/lib/prisma';
 import { parseJson, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';

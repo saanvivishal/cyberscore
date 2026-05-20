@@ -7,7 +7,7 @@ import { logger } from './logger';
 // never leaves our server.
 
 const HIBP_URL = 'https://api.pwnedpasswords.com/range';
-const UA = 'CyberScore/1.0 (+https://cyberscore.app)';
+const UA = 'CyMetric/1.0 (+https://cymetric.app)';
 
 export interface PwnedResult {
   pwned: boolean;

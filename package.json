@@ -1,8 +1,8 @@
 {
-  "name": "cyberscore",
+  "name": "cymetric",
   "version": "0.1.0",
   "private": true,
-  "description": "CyberScore — cybersecurity health scorecard for organisations",
+  "description": "CyMetric — cybersecurity health scorecard for organisations",
   "workspaces": [
     "apps/*",
     "packages/*"

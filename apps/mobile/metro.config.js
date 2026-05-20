@@ -8,7 +8,7 @@ const workspaceRoot = path.resolve(projectRoot, '../..');
 const config = getDefaultConfig(projectRoot);
 
 // Monorepo — watch the workspace root and resolve from both node_modules trees
-// so @cyberscore/sdk and @cyberscore/types resolve cleanly without hoisting quirks.
+// so @cymetric/sdk and @cymetric/types resolve cleanly without hoisting quirks.
 config.watchFolders = [workspaceRoot];
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),

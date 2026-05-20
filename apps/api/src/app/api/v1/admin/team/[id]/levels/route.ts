@@ -4,7 +4,7 @@ import {
   Role,
   UpdateMemberLevelsRequest,
   type UpdateMemberLevelsResponse,
-} from '@cyberscore/types';
+} from '@cymetric/types';
 import { withTenant } from '@/lib/prisma';
 import { problem, parseJson, internalError } from '@/lib/problem';
 import { requireAdmin } from '@/lib/require-admin';

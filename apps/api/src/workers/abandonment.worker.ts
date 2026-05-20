@@ -31,7 +31,7 @@ const STAGE_COPY: Record<
     body: 'It only takes a couple of minutes per KPI. Finish what you started.',
   },
   '7D': {
-    title: 'Still interested in your CyberScore?',
+    title: 'Still interested in your CyMetric?',
     body: "Come back and wrap up the assessment — we'll show you exactly what to improve.",
   },
 };

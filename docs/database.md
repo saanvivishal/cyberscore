@@ -23,7 +23,7 @@ PostgreSQL 16 schema managed by Prisma 6.
 brew services start postgresql@16
 
 # 2. Create the database
-createdb cyberscore
+createdb cymetric
 
 # 3. Apply migrations
 cd apps/api
@@ -38,8 +38,8 @@ The seed populates the **KPI catalogue** (46 KPIs across People/Process/Company)
 ## Connecting
 
 ```env
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/cyberscore?schema=public
-DIRECT_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/cyberscore?schema=public
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/cymetric?schema=public
+DIRECT_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/cymetric?schema=public
 ```
 
 `DATABASE_URL` is what Prisma reads at runtime. `DIRECT_DATABASE_URL` is used for migrations. In production we point at Neon's pooled connection for `DATABASE_URL` and the direct connection for `DIRECT_DATABASE_URL`. In local development both can be the same localhost URL.

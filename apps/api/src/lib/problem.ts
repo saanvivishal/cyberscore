@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { ZodError, type ZodSchema } from 'zod';
-import { ErrorCodes, type ErrorCode, type ProblemDetails } from '@cyberscore/types';
+import { ErrorCodes, type ErrorCode, type ProblemDetails } from '@cymetric/types';
 import { logger } from './logger';
 
-const TYPE_BASE = 'https://cyberscore.app/errors';
+const TYPE_BASE = 'https://cymetric.app/errors';
 
 // Static problem details — any status/code/title combination the API returns.
 const CATALOG: Record<ErrorCode, { status: number; title: string }> = {

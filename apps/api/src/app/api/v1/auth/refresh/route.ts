@@ -5,7 +5,7 @@ import {
   ErrorCodes,
   type Role,
   type TokenPair,
-} from '@cyberscore/types';
+} from '@cymetric/types';
 import { issueTokenPair } from '@/lib/auth';
 import { withBypassRls } from '@/lib/prisma';
 import { problem, parseJson, internalError } from '@/lib/problem';

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { MeResponse } from '@cyberscore/types';
+import type { MeResponse } from '@cymetric/types';
 
 // Single source of truth for session state. Persistence lives in
 // expo-secure-store (see lib/storage.ts); this store mirrors just enough

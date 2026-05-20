@@ -1,5 +1,5 @@
 import Constants from 'expo-constants';
-import { createCyberScoreClient } from '@cyberscore/sdk';
+import { createCyMetricClient } from '@cymetric/sdk';
 import { secureTokenStorage } from './storage';
 import { useAuthStore } from '@/stores/auth';
 
@@ -13,10 +13,10 @@ const baseUrl =
   (Constants.expoConfig?.extra?.apiBaseUrl as string | undefined) ||
   'http://localhost:3000';
 
-export const api = createCyberScoreClient({
+export const api = createCyMetricClient({
   baseUrl,
   storage: secureTokenStorage,
-  userAgent: `CyberScore-Mobile/${Constants.expoConfig?.version ?? '0.0.0'}`,
+  userAgent: `CyMetric-Mobile/${Constants.expoConfig?.version ?? '0.0.0'}`,
   onAuthFailure: () => {
     // SDK clears tokens; we just flip the store so the router redirects.
     useAuthStore.getState().setUnauthenticated();

@@ -1,5 +1,5 @@
 -- ============================================================
--- CyberScore — Row-Level Security policies
+-- CyMetric — Row-Level Security policies
 -- ============================================================
 -- Applied AFTER `prisma migrate deploy`. Defence-in-depth: even if
 -- application-layer getAuthOrg() has a bug, Postgres will refuse to
@@ -16,16 +16,16 @@
 -- The Prisma connection user MUST NOT be a superuser or the table
 -- owner, otherwise RLS is silently bypassed. Create a dedicated role:
 --
---   CREATE ROLE cyberscore_app LOGIN PASSWORD '...';
---   GRANT CONNECT ON DATABASE cyberscore TO cyberscore_app;
---   GRANT USAGE ON SCHEMA public TO cyberscore_app;
+--   CREATE ROLE cymetric_app LOGIN PASSWORD '...';
+--   GRANT CONNECT ON DATABASE cymetric TO cymetric_app;
+--   GRANT USAGE ON SCHEMA public TO cymetric_app;
 --   GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES
---     IN SCHEMA public TO cyberscore_app;
+--     IN SCHEMA public TO cymetric_app;
 --   ALTER DEFAULT PRIVILEGES IN SCHEMA public
 --     GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES
---     TO cyberscore_app;
+--     TO cymetric_app;
 --
--- Then set DATABASE_URL to use cyberscore_app.
+-- Then set DATABASE_URL to use cymetric_app.
 
 -- ------------------------------------------------------------
 -- Helper: resolve current org id (NULL if unset)

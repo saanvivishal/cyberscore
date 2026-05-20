@@ -15,7 +15,7 @@ For database structure, see [database.md](database.md).
 flowchart TB
   ADMIN[Org admin]
   EMP[Employee]
-  CS[CyberScore platform<br/>Mobile + API + Workers]
+  CS[CyMetric platform<br/>Mobile + API + Workers]
   PG[(Postgres)]
   REDIS[(Redis)]
   R2[(S3/R2)]
@@ -149,7 +149,7 @@ sequenceDiagram
   API->>W: enqueueInviteEmail
   API-->>AM: 200 {token, inviteUrl}
   Note over AM: Show "Invite sent" + Share button
-  W->>EMP: Email with cyberscore://invite?t=...
+  W->>EMP: Email with cymetric://invite?t=...
   EMP->>AM: Opens link
   AM->>API: GET /auth/invite/:token
   API->>DB: lookup by tokenHash, return preview + allowedLevels

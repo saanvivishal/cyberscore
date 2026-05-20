@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { LoginRequest, ErrorCodes, type Role } from '@cyberscore/types';
+import { LoginRequest, ErrorCodes, type Role } from '@cymetric/types';
 import { verifyPassword, issueTokenPair } from '@/lib/auth';
 import { verifyTotpCode } from '@/lib/totp';
 import { withBypassRls } from '@/lib/prisma';

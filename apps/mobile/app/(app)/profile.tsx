@@ -13,7 +13,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { OrgMode, Role } from '@cyberscore/types';
+import { OrgMode, Role } from '@cymetric/types';
 import { Screen } from '@/components/Screen';
 import { TopBar } from '@/components/TopBar';
 import { Card } from '@/components/Card';
@@ -178,17 +178,17 @@ export default function Profile() {
           <LinkRow
             icon="document-text"
             label="Privacy policy"
-            onPress={() => Alert.alert('Privacy', 'cyberscore.app/privacy')}
+            onPress={() => Alert.alert('Privacy', 'cymetric.app/privacy')}
           />
           <LinkRow
             icon="help-circle"
             label="Help & support"
-            onPress={() => Alert.alert('Support', 'support@cyberscore.app')}
+            onPress={() => Alert.alert('Support', 'support@cymetric.app')}
           />
           <LinkRow
             icon="information-circle"
             label="About"
-            onPress={() => Alert.alert('CyberScore', 'Version 1.0.0 · MVP')}
+            onPress={() => Alert.alert('CyMetric', 'Version 1.0.0 · MVP')}
             last
           />
         </Card>

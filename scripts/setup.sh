@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# CyberScore — one-shot local bootstrap.
+# CyMetric — one-shot local bootstrap.
 #
 # Idempotent: safe to re-run. It checks each step and skips work that's
 # already done. On a fresh machine this takes ~3 minutes (mostly npm install).
@@ -89,10 +89,10 @@ fi
 step "Setting up the database"
 
 # Try to create the database; ignore if it already exists.
-if createdb cyberscore 2>/dev/null; then
-  dim "Created database 'cyberscore'"
+if createdb cymetric 2>/dev/null; then
+  dim "Created database 'cymetric'"
 else
-  dim "Database 'cyberscore' already exists — continuing"
+  dim "Database 'cymetric' already exists — continuing"
 fi
 
 step "Applying Prisma migrations"
@@ -119,14 +119,14 @@ cat <<'EOF'
 Next steps — start the stack in three terminals:
 
   Tab 1 (API):
-    npm run dev --workspace @cyberscore/api
+    npm run dev --workspace @cymetric/api
 
   Tab 2 (Workers):
-    npm run worker --workspace @cyberscore/api
+    npm run worker --workspace @cymetric/api
 
   Tab 3 (Mobile):
     EXPO_PUBLIC_API_URL=http://$(ipconfig getifaddr en0):3000 \
-      npm run start --workspace @cyberscore/mobile
+      npm run start --workspace @cymetric/mobile
 
   Then press 'i' in the Metro terminal to open the iOS Simulator,
   or scan the QR code with Expo Go on your phone.

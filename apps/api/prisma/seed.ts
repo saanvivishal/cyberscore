@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { PrismaClient, Framework, InputType, Level } from '@prisma/client';
-import type { ScoreRange, SuggestionPriority } from '@cyberscore/types';
+import type { ScoreRange, SuggestionPriority } from '@cymetric/types';
 import {
   SUGGESTIONS_BY_KPI,
   GENERIC_SUGGESTIONS,

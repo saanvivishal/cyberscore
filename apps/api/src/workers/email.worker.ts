@@ -18,8 +18,8 @@ export function startEmailWorker(): Worker<EmailJob> {
       if (data.type === 'SCORECARD_PDF') {
         await sendEmail({
           to: data.email,
-          subject: 'Your CyberScore report is ready',
-          text: `Hi ${data.orgName},\n\nYour scorecard PDF: ${data.pdfUrl}\n\n— CyberScore`,
+          subject: 'Your CyMetric report is ready',
+          text: `Hi ${data.orgName},\n\nYour scorecard PDF: ${data.pdfUrl}\n\n— CyMetric`,
           html: `<p>Hi ${data.orgName},</p><p>Your scorecard PDF: <a href="${data.pdfUrl}">${data.pdfUrl}</a></p>`,
         });
         return { sent: true };

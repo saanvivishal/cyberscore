@@ -1,4 +1,4 @@
-# CyberScore Mobile — Handoff
+# CyMetric Mobile — Handoff
 
 A full snapshot of the app, architecture, recent design work, known gotchas, and pending tasks. If you open a fresh Claude session, point it at this file first.
 
@@ -6,25 +6,25 @@ A full snapshot of the app, architecture, recent design work, known gotchas, and
 
 ## 1. What the app is
 
-**CyberScore** — a React Native + Expo SDK 52 mobile app that scores a company's cyber resilience across three dimensions (People, Process, Company) via **46 KPIs**. Each KPI has 4 tier options mapped to NIST CSF 2.0 functions (PROTECT / DETECT / RESPOND / RECOVER / IDENTIFY / GOVERN).
+**CyMetric** — a React Native + Expo SDK 52 mobile app that scores a company's cyber resilience across three dimensions (People, Process, Company) via **46 KPIs**. Each KPI has 4 tier options mapped to NIST CSF 2.0 functions (PROTECT / DETECT / RESPOND / RECOVER / IDENTIFY / GOVERN).
 
 - Users: single-org admins running a self-assessment
 - Flow: onboarding → register → OTP verify → login → dashboard → pick level → answer 46 KPIs one at a time → results → scorecard / analytics
 - Backend: Node/Fastify API with Postgres, JWT + refresh auth, Prisma
-- Repo root: `/Users/saanvivishal/Desktop/cyberscore`
+- Repo root: `/Users/saanvivishal/Desktop/cymetric`
 
 ---
 
 ## 2. Monorepo structure
 
 ```
-cyberscore/
+cymetric/
 ├── apps/
 │   ├── api/           # Fastify backend (runs on localhost:3000)
 │   └── mobile/        # ← this is the app we've been working on
 ├── packages/
-│   ├── sdk/           # Shared API client (@cyberscore/sdk)
-│   └── types/         # Shared TS types (@cyberscore/types)
+│   ├── sdk/           # Shared API client (@cymetric/sdk)
+│   └── types/         # Shared TS types (@cymetric/types)
 ```
 
 Inside `apps/mobile/`:
@@ -63,7 +63,7 @@ apps/mobile/
 │   │   ├── BrandLogo.tsx         # CYBER//SCORE wordmark
 │   │   └── PressableGlow.tsx     # Pressable with scale + glow
 │   ├── lib/
-│   │   ├── api.ts                # @cyberscore/sdk wired with SecureStore
+│   │   ├── api.ts                # @cymetric/sdk wired with SecureStore
 │   │   └── queryClient.ts        # TanStack Query config
 │   ├── stores/
 │   │   └── auth.ts               # Zustand auth store
@@ -90,7 +90,7 @@ apps/mobile/
 | Charts | react-native-svg (custom Path/Circle with LinearGradient) |
 | Icons | @expo/vector-icons (Ionicons) |
 | Effects | expo-blur (glassmorphism), expo-linear-gradient |
-| API client | `@cyberscore/sdk` workspace package (fetch wrapper with auto-refresh) |
+| API client | `@cymetric/sdk` workspace package (fetch wrapper with auto-refresh) |
 
 ---
 
@@ -153,9 +153,9 @@ The app uses restrained glassmorphism (not the earlier "cyberpunk HUD"). Rules:
 
 ### Rewritten screens
 - `dashboard.tsx` — Tonal LevelTile cards with the 3 dimensions, Company card is full-width with SECURE pill + ANSWERED/TOTAL/SCORE stats, gradient-border RESUME ASSESSMENT pill
-- `register.tsx` — Shield icon hero + CYBERSCORE wordmark, glass card with LOGIN/REGISTER tabs, firstName/middleName/surname side-by-side row, mobile/password/orgName/industry chips
+- `register.tsx` — Shield icon hero + CYMETRIC wordmark, glass card with LOGIN/REGISTER tabs, firstName/middleName/surname side-by-side row, mobile/password/orgName/industry chips
 - `analytics.tsx` — "Performance Trends" heading, SegmentedControl (7D/1M/3M/6M/1Y), smooth bezier curve chart with gradient fill + y-gridlines, Category Comparison with previous (white/25%) + current (brand blue) bar pairs, Snapshot timeline with vertical connector line + dots + delta arrows
-- `kpi/[id].tsx` — Custom header with back chevron + italic "CyberScore" wordmark + progress underline (blue bar), PROTECT framework pill with shield icon, green-glow-selected tier option rows with filled checkmark, sticky footer with PAUSE & SAVE (outline) + NEXT QUESTION (primary) — footer is OUTSIDE the ScrollView so it doesn't get cut off, navigates to `/(app)/results` on completion
+- `kpi/[id].tsx` — Custom header with back chevron + italic "CyMetric" wordmark + progress underline (blue bar), PROTECT framework pill with shield icon, green-glow-selected tier option rows with filled checkmark, sticky footer with PAUSE & SAVE (outline) + NEXT QUESTION (primary) — footer is OUTSIDE the ScrollView so it doesn't get cut off, navigates to `/(app)/results` on completion
 
 ### Layout updates
 - `(app)/_layout.tsx` — hide internal routes from tab bar:

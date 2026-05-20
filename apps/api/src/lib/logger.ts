@@ -5,7 +5,7 @@ import { env, isProd } from './env';
 export const logger: Logger = pino({
   level: isProd ? 'info' : 'debug',
   base: {
-    service: 'cyberscore-api',
+    service: 'cymetric-api',
     env: env.NODE_ENV,
   },
   redact: {

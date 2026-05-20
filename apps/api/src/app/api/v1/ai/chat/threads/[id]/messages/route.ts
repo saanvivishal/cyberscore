@@ -5,7 +5,7 @@ import {
   SendChatMessageRequest,
   type ChatMessageListResponse,
   type ChatStreamEvent,
-} from '@cyberscore/types';
+} from '@cymetric/types';
 import { withTenant } from '@/lib/prisma';
 import { problem, parseJson, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';
@@ -277,7 +277,7 @@ export async function POST(
       });
 
       let modelUsed = env.USE_LOCAL_ADVISOR
-        ? 'cyberscore-local-advisor'
+        ? 'cymetric-local-advisor'
         : env.ANTHROPIC_MODEL_PRIMARY;
       let assistantText = '';
       let inputTokens = 0;
@@ -414,7 +414,7 @@ export async function POST(
 
 // Frozen across users — keep stable to maximise prompt-cache hits at the
 // org/user level. Don't interpolate timestamps or per-request data here.
-const BASE_ADVISOR_PROMPT = `You are CyberScore's security advisor — an in-app AI helping organisations interpret and improve their cybersecurity scorecard.
+const BASE_ADVISOR_PROMPT = `You are CyMetric's security advisor — an in-app AI helping organisations interpret and improve their cybersecurity scorecard.
 
 GUIDELINES
 - Be direct and concrete. Reference the user's actual scores and underperforming KPIs from the <scorecard> block when relevant.

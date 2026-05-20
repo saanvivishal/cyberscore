@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ErrorCodes, InviteStatus } from '@cyberscore/types';
+import { ErrorCodes, InviteStatus } from '@cymetric/types';
 import { withBypassRls } from '@/lib/prisma';
 import { problem, internalError } from '@/lib/problem';
 import { rateLimit, clientIp } from '@/lib/rate-limit';

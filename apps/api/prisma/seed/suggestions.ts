@@ -1,4 +1,4 @@
-import type { ScoreRange, SuggestionPriority } from '@cyberscore/types';
+import type { ScoreRange, SuggestionPriority } from '@cymetric/types';
 
 // Default improvement suggestions per KPI name, broken out by score band.
 // Shown on the scorecard for any KPI at AMBER (50–74%) or RED (<50%).

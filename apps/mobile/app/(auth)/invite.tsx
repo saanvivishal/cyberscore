@@ -9,8 +9,8 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { ApiError } from '@cyberscore/sdk';
-import { ErrorCodes, type InvitePreview } from '@cyberscore/types';
+import { ApiError } from '@cymetric/sdk';
+import { ErrorCodes, type InvitePreview } from '@cymetric/types';
 import { Screen } from '@/components/Screen';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
@@ -19,7 +19,7 @@ import { useAuthStore } from '@/stores/auth';
 import { colors } from '@/theme/colors';
 
 // Accept-invite screen — opened by tapping the link in the invite email,
-// which routes to `cyberscore://invite?t=<token>` via expo-linking. Falls
+// which routes to `cymetric://invite?t=<token>` via expo-linking. Falls
 // back to a manual paste UI if the token query param is missing.
 //
 // Flow: preview the invite → user fills name + password → call accept-invite
@@ -154,7 +154,7 @@ export default function AcceptInvite() {
               lineHeight: 18,
             }}
           >
-            Set a password to join your team's CyberScore workspace.
+            Set a password to join your team's CyMetric workspace.
           </Text>
         </View>
 

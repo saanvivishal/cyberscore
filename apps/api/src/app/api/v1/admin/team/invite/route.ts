@@ -7,7 +7,7 @@ import {
   OrgMode,
   Role,
   type CreateInviteResponse,
-} from '@cyberscore/types';
+} from '@cymetric/types';
 import { withTenant } from '@/lib/prisma';
 import { problem, parseJson, internalError } from '@/lib/problem';
 import { rateLimit } from '@/lib/rate-limit';

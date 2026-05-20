@@ -2,7 +2,7 @@ import argon2 from 'argon2';
 import bcrypt from 'bcrypt';
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import { createHash } from 'node:crypto';
-import type { JwtPayload, TokenPair, Role } from '@cyberscore/types';
+import type { JwtPayload, TokenPair, Role } from '@cymetric/types';
 import { env } from './env';
 import { prisma } from './prisma';
 import { randomToken } from './crypto';

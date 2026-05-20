@@ -1,5 +1,5 @@
 """
-Generate the handover PDF for CyberScore.
+Generate the handover PDF for CyMetric.
 
 The PDF has two parts:
   1. Final Report: a complete written walkthrough of the project.
@@ -160,7 +160,7 @@ story = []
 # ======= COVER =======
 story += [
     Spacer(1, 1.6*inch),
-    P("CyberScore", "TitleBig"),
+    P("CyMetric", "TitleBig"),
     P("A Mobile First Cybersecurity Health Scorecard for Organisations", "Subtitle"),
     Spacer(1, 0.6*inch),
     P("Final Report and Presentation Outline", "Subtitle"),
@@ -220,7 +220,7 @@ story += [
 story += [
     H1("1. Abstract"),
     P(
-        "CyberScore is a mobile first SaaS product that lets a company check its own "
+        "CyMetric is a mobile first SaaS product that lets a company check its own "
         "cybersecurity health. The user answers 46 questions across three areas: People, "
         "Process, and Company. The app then gives them a live numeric score, shows which "
         "areas are weak, and offers personalised suggestions. There is also a built in chat "
@@ -257,7 +257,7 @@ story += [
         "path actually makes them safer."
     ),
     P(
-        "CyberScore solves this by giving the company a structured self assessment that takes "
+        "CyMetric solves this by giving the company a structured self assessment that takes "
         "about thirty minutes. At the end the company knows three things: what is the current "
         "score, where are the weakest areas, and what are the next three actions to take. It "
         "is not a substitute for a real audit, but it is a cheap and useful first step that any "
@@ -269,7 +269,7 @@ story += [
 story += [
     H1("3. Solution Overview"),
     P(
-        "CyberScore has three parts that work together."
+        "CyMetric has three parts that work together."
     ),
     bullets([
         "<b>Mobile app.</b> An Android app built with React Native and Expo. The user signs in, takes the assessment, sees the scorecard, and chats with the advisor. Everything important happens here.",
@@ -595,7 +595,7 @@ story += [
         "<b>R2 evidence uploads not wired.</b> The schema and routes exist but the R2 credentials are placeholders. Real bucket and CORS policy needed.",
         "<b>Push notifications dormant.</b> The table, the worker, the SDK plumbing all exist but no admin UI triggers them.",
         "<b>PDF export not built.</b> The email worker has a SCORECARD_PDF job type defined but no PDF rendering code yet.",
-        "<b>Brevo free tier rewrites the sender email to a generic relay domain.</b> Display name CyberScore is preserved but the technical from address contains my name (a side effect of using a freemail account). A custom verified domain or sender would clean this up.",
+        "<b>Brevo free tier rewrites the sender email to a generic relay domain.</b> Display name CyMetric is preserved but the technical from address contains my name (a side effect of using a freemail account). A custom verified domain or sender would clean this up.",
         "<b>No staging environment.</b> One production database and one production deployment. Add a staging Neon branch plus a Vercel preview before the next major change.",
     ]),
 ]
@@ -639,7 +639,7 @@ story += [
 story += [
     H1("13. Conclusion"),
     P(
-        "CyberScore started as a five week capstone and ended as a real, working, deployed "
+        "CyMetric started as a five week capstone and ended as a real, working, deployed "
         "product. The mobile app installs on a real Android phone. The API runs on Vercel. The "
         "database lives in Singapore. Emails arrive in real inboxes. The full happy path works "
         "end to end."
@@ -709,10 +709,10 @@ story += [
 # --- Slide 1 ---
 story += [
     P("Slide 1: Title", "SlideTitle"),
-    P("<b>Title:</b> CyberScore: A Cybersecurity Health Scorecard for Organisations", "Body"),
+    P("<b>Title:</b> CyMetric: A Cybersecurity Health Scorecard for Organisations", "Body"),
     P("<b>On the slide:</b>", "Body"),
     bullets([
-        "Project name in large type: CyberScore",
+        "Project name in large type: CyMetric",
         "Tagline: Self assessment cybersecurity in your pocket",
         "Your name and roll number: Saanvi Vishal, IMT2021043",
         "Mentor: Mohan Ram C, FISST",
@@ -722,7 +722,7 @@ story += [
     P("<b>Speaker note (about 30 seconds):</b>", "Body"),
     P(
         "Introduce yourself, name the project, name the mentor and the institution. Say one "
-        "sentence about what CyberScore is, for example: a mobile app that lets a company "
+        "sentence about what CyMetric is, for example: a mobile app that lets a company "
         "check its cybersecurity health in thirty minutes and get specific advice on what to "
         "fix next.",
         "Quote"
@@ -732,7 +732,7 @@ story += [
 # --- Slide 2 ---
 story += [
     P("Slide 2: Problem and Solution", "SlideTitle"),
-    P("<b>Title:</b> The Problem, and What CyberScore Does", "Body"),
+    P("<b>Title:</b> The Problem, and What CyMetric Does", "Body"),
     P("<b>On the slide (left half: the problem):</b>", "Body"),
     bullets([
         "Small and mid size companies do not know how good their cybersecurity is.",
@@ -750,7 +750,7 @@ story += [
     P(
         "Describe the problem in plain language. A founder running a fintech startup with five "
         "engineers cannot afford a security audit. They know they should do something but they "
-        "do not know what. CyberScore is a structured self assessment that gives them a score, "
+        "do not know what. CyMetric is a structured self assessment that gives them a score, "
         "shows them where they are weak, and tells them the next three actions. It is not a "
         "replacement for a real audit, but it is a cheap and useful first step.",
         "Quote"
@@ -914,7 +914,7 @@ def _on_page(canvas, doc):
     canvas.setFont("Helvetica", 8)
     canvas.setFillColor(MUTED)
     if doc.page > 1:
-        canvas.drawString(0.75*inch, 0.4*inch, f"CyberScore. Final report and slides. Page {doc.page}.")
+        canvas.drawString(0.75*inch, 0.4*inch, f"CyMetric. Final report and slides. Page {doc.page}.")
         canvas.drawRightString(LETTER[0] - 0.75*inch, 0.4*inch, "Saanvi Vishal, IIIT Bangalore")
     canvas.restoreState()
 
@@ -922,7 +922,7 @@ doc = SimpleDocTemplate(
     OUT, pagesize=LETTER,
     leftMargin=0.85*inch, rightMargin=0.85*inch,
     topMargin=0.85*inch, bottomMargin=0.7*inch,
-    title="CyberScore: Final Report and Slides Outline",
+    title="CyMetric: Final Report and Slides Outline",
     author="Saanvi Vishal",
     subject="Capstone handover documentation",
 )

@@ -1,5 +1,5 @@
 import EventSource from 'react-native-sse';
-import type { ChatStreamEvent, TokenPair } from '@cyberscore/types';
+import type { ChatStreamEvent, TokenPair } from '@cymetric/types';
 import { secureTokenStorage } from './storage';
 import { API_BASE_URL } from './api';
 

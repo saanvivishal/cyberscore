@@ -12,7 +12,7 @@ interface TopBarProps {
   rightSlot?: React.ReactNode;
 }
 
-// Glass wordmark header. Italic brand-blue CYBERSCORE (matches the reference
+// Glass wordmark header. Italic brand-blue CYMETRIC (matches the reference
 // mocks). Left slot takes either a back chevron or a circular avatar chip
 // (the avatar navigates to /profile). Right slot is reserved for caller-
 // supplied controls. No bell, no glow — restraint beats pyrotechnics.
@@ -48,7 +48,7 @@ export function TopBar({ title, showAvatar, showBack, rightSlot }: TopBarProps) 
             fontSize: 18,
           }}
         >
-          {title ?? 'CYBERSCORE'}
+          {title ?? 'CYMETRIC'}
         </Text>
       </View>
       {rightSlot && <View className="flex-row items-center gap-3">{rightSlot}</View>}

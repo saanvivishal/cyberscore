@@ -30,7 +30,7 @@ export function hashInviteToken(raw: string): string {
   return createHash('sha256').update(raw).digest('hex');
 }
 
-// Build the deep-link URL the employee follows. Uses the `cyberscore://`
+// Build the deep-link URL the employee follows. Uses the `cymetric://`
 // scheme so opening it on a device with the app installed routes straight
 // to the accept-invite screen via expo-router. A web fallback host can be
 // layered on later (Apple universal links + Play asset links) without
@@ -39,6 +39,6 @@ export function inviteUrlFor(rawToken: string): string {
   // Hardcoded scheme matches app.json -> expo.scheme. Avoid URL() because
   // Node's parser rejects custom schemes without `//host`.
   const escaped = encodeURIComponent(rawToken);
-  return `cyberscore://invite?t=${escaped}`;
+  return `cymetric://invite?t=${escaped}`;
 }
 

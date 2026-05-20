@@ -1,4 +1,4 @@
-import type { TierCondition } from '@cyberscore/types';
+import type { TierCondition } from '@cymetric/types';
 
 // Evaluates a single KPI response against its scoring tiers.
 //

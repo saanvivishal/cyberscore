@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { EvidenceConfirmRequest, ErrorCodes } from '@cyberscore/types';
+import { EvidenceConfirmRequest, ErrorCodes } from '@cymetric/types';
 import { withTenant } from '@/lib/prisma';
 import { parseJson, problem, internalError } from '@/lib/problem';
 import { requireAuth } from '@/lib/require-auth';

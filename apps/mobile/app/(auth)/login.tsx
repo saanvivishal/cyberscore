@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { router } from 'expo-router';
-import type { LoginRequest } from '@cyberscore/types';
+import type { LoginRequest } from '@cymetric/types';
 import { Screen } from '@/components/Screen';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
@@ -89,7 +89,7 @@ export default function LoginScreen() {
               <Input
                 label="Email Address"
                 icon="mail-outline"
-                placeholder="user@cyberscore.net"
+                placeholder="user@cymetric.net"
                 autoCapitalize="none"
                 autoComplete="email"
                 keyboardType="email-address"

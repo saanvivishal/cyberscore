@@ -1,5 +1,5 @@
 import type { NextResponse } from 'next/server';
-import { Role, ErrorCodes } from '@cyberscore/types';
+import { Role, ErrorCodes } from '@cymetric/types';
 import { requireAuth } from './require-auth';
 import { problem } from './problem';
 import type { AuthContext } from './auth';

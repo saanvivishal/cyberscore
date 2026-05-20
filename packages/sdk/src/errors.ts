@@ -1,4 +1,4 @@
-import type { ProblemDetails, ErrorCode } from '@cyberscore/types';
+import type { ProblemDetails, ErrorCode } from '@cymetric/types';
 
 export class ApiError extends Error {
   readonly status: number;

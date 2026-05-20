@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { AiCompareRequest, AiCompareResponse, ErrorCodes } from '@cyberscore/types';
+import { AiCompareRequest, AiCompareResponse, ErrorCodes } from '@cymetric/types';
 import { withTenant, withBypassRls } from '@/lib/prisma';
 import { requireAuth } from '@/lib/require-auth';
 import { parseJson, problem, internalError } from '@/lib/problem';
@@ -27,7 +27,7 @@ import { audit, AuditActions } from '@/lib/audit';
 // doesn't parse we fail with AI_VALIDATION_FAILED rather than passing
 // freeform text back to mobile.
 
-const SYSTEM_PROMPT = `You are CyberScore's risk analysis engine. You receive a cybersecurity scorecard and return ONLY a valid JSON object matching this TypeScript type:
+const SYSTEM_PROMPT = `You are CyMetric's risk analysis engine. You receive a cybersecurity scorecard and return ONLY a valid JSON object matching this TypeScript type:
 
 {
   "comparisonSummary": string (20-1200 chars),
