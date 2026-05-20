@@ -1,4 +1,4 @@
-import { Pressable, Text, View, ActivityIndicator, Platform } from 'react-native';
+import { Pressable, Text, View, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -51,29 +51,29 @@ export function Button({
 
   const iconColor = labelColor;
 
+  // The `loading` prop still gates double-taps via the Pressable below
+  // (disabled={disabled || loading}), but we deliberately do not render a
+  // spinner inside the button anymore. The user sees the same label they
+  // tapped, the tap is registered, and the screen transition happens as
+  // soon as the underlying work finishes. Feels snappier on demo screens
+  // where the API call is sub-second.
   const inner = (
     <View className={`flex-row items-center justify-center ${heightCls} px-5`}>
-      {loading ? (
-        <ActivityIndicator color={iconColor} />
-      ) : (
-        <>
-          {icon && (
-            <Ionicons name={icon} size={18} color={iconColor} style={{ marginRight: 8 }} />
-          )}
-          <Text
-            style={{
-              color: labelColor,
-              fontSize: textSize,
-              fontWeight: '700',
-              letterSpacing: 1.8,
-            }}
-          >
-            {label.toUpperCase()}
-          </Text>
-          {iconRight && (
-            <Ionicons name={iconRight} size={18} color={iconColor} style={{ marginLeft: 8 }} />
-          )}
-        </>
+      {icon && (
+        <Ionicons name={icon} size={18} color={iconColor} style={{ marginRight: 8 }} />
+      )}
+      <Text
+        style={{
+          color: labelColor,
+          fontSize: textSize,
+          fontWeight: '700',
+          letterSpacing: 1.8,
+        }}
+      >
+        {label.toUpperCase()}
+      </Text>
+      {iconRight && (
+        <Ionicons name={iconRight} size={18} color={iconColor} style={{ marginLeft: 8 }} />
       )}
     </View>
   );
