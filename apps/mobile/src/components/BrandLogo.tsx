@@ -1,8 +1,14 @@
 import { View, Text, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-// Stacked brandmark for auth screens: glowing hex emblem with a shield-check
-// inside, above the CYBER//SCORE wordmark.
+// Stacked brandmark for auth screens. A glowing rounded-square emblem with
+// a pulse / analytics icon inside, above the CyMetric wordmark with the
+// 'Cy' prefix in neon cyan and 'Metric' in soft white. The tagline reads
+// SECURE ACCESS PROTOCOL.
+//
+// Visual language: glassmorphism + neon cyan accents that match the rest
+// of the auth flow. The emblem uses three layered rings (halo, rotated
+// frame, inner card) plus four corner-bracket accents to evoke a HUD.
 export function BrandLogo() {
   return (
     <View pointerEvents="none" style={{ alignItems: 'center' }}>
@@ -58,7 +64,11 @@ export function BrandLogo() {
               : { elevation: 12 }),
           }}
         >
-          <Ionicons name="shield-checkmark" size={36} color="#22d3ee" />
+          {/* pulse-rate icon: a heartbeat / metric line inside a shield
+              shape. Reads simultaneously as security (shield) and
+              measurement (pulse line), which is exactly what the product
+              does. Stroke colour matches the cyan accent ring. */}
+          <Ionicons name="pulse" size={38} color="#22d3ee" />
         </View>
         {/* Corner accents */}
         <View style={corner(0, 0, true, true)} />
@@ -67,46 +77,32 @@ export function BrandLogo() {
         <View style={corner(undefined, undefined, false, false)} />
       </View>
 
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
         <Text
           style={{
-            fontSize: 40,
+            fontSize: 44,
             fontWeight: '900',
-            letterSpacing: 2,
-            color: '#e0f2fe',
-            textShadowColor: 'rgba(34,211,238,0.9)',
-            textShadowOffset: { width: 0, height: 0 },
-            textShadowRadius: 18,
-          }}
-        >
-          CYBER
-        </Text>
-        <Text
-          style={{
-            fontSize: 40,
-            fontWeight: '900',
-            letterSpacing: 2,
+            letterSpacing: 1,
             color: '#22d3ee',
-            marginHorizontal: 2,
             textShadowColor: 'rgba(34,211,238,0.9)',
             textShadowOffset: { width: 0, height: 0 },
             textShadowRadius: 18,
           }}
         >
-          //
+          Cy
         </Text>
         <Text
           style={{
-            fontSize: 40,
+            fontSize: 44,
             fontWeight: '900',
-            letterSpacing: 2,
+            letterSpacing: 1,
             color: '#e0f2fe',
-            textShadowColor: 'rgba(34,211,238,0.9)',
+            textShadowColor: 'rgba(34,211,238,0.6)',
             textShadowOffset: { width: 0, height: 0 },
             textShadowRadius: 18,
           }}
         >
-          SCORE
+          Metric
         </Text>
       </View>
 
